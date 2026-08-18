@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STYLESHOP — Premium Fashion</title>
+    <title>NOVAULT — BEYOND ORDINARY.</title>
     <style>
         :root {
             --white: #FFFFFF;
@@ -156,6 +156,15 @@
 
         .logo span {
             color: var(--point);
+        }
+
+        .logo-slogan {
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 1.5px;
+            color: var(--gray-400);
+            margin-left: 12px;
+            text-transform: uppercase;
         }
 
         .header-nav {
@@ -1592,9 +1601,10 @@
 
     <script>
         // ============================================================
-        //  STYLESHOP — Complete E-Commerce Application
-        //  © 2026 StyleShop. All rights reserved.
+        //  NOVAULT — Complete E-Commerce Application
+        //  © 2026 NOVAULT. All rights reserved.
         //  Design: Apple-style / Benchmarking: Musinsa
+        //  Brand: NOVAULT — "BEYOND ORDINARY."
         // ============================================================
 
         (function() {
@@ -1604,7 +1614,8 @@
             //  SECTION 1: CONSTANTS & CONFIGURATION
             // ============================================================
 
-            const APP_NAME = 'STYLESHOP';
+            const APP_NAME = 'NOVAULT';
+            const APP_SLOGAN = 'BEYOND ORDINARY.';
             const DEFAULT_ADMIN_EMAIL = 'admin@shopmall.com';
             const DEFAULT_ADMIN_PASSWORD = 'Admin1234!';
             const DEFAULT_ADMIN_NAME = '관리자';
@@ -1670,12 +1681,12 @@
             }
 
             function getSession() {
-                const session = localStorage.getItem('styleshop_session');
+                const session = localStorage.getItem('novault_session');
                 if (!session) return null;
                 try {
                     const parsed = JSON.parse(session);
                     if (parsed.expiresAt && Date.now() > parsed.expiresAt) {
-                        localStorage.removeItem('styleshop_session');
+                        localStorage.removeItem('novault_session');
                         return null;
                     }
                     return parsed;
@@ -1691,11 +1702,11 @@
                     createdAt: Date.now(),
                     expiresAt: remember ? Date.now() + (30 * 24 * 60 * 60 * 1000) : Date.now() + (24 * 60 * 60 * 1000)
                 };
-                localStorage.setItem('styleshop_session', JSON.stringify(session));
+                localStorage.setItem('novault_session', JSON.stringify(session));
             }
 
             function clearSession() {
-                localStorage.removeItem('styleshop_session');
+                localStorage.removeItem('novault_session');
             }
 
             function getCurrentUser() {
@@ -1719,74 +1730,74 @@
             // ============================================================
 
             function getUsers() {
-                const data = localStorage.getItem('styleshop_users');
+                const data = localStorage.getItem('novault_users');
                 return data ? JSON.parse(data) : [];
             }
 
             function saveUsers(users) {
-                localStorage.setItem('styleshop_users', JSON.stringify(users));
+                localStorage.setItem('novault_users', JSON.stringify(users));
             }
 
             function getProducts() {
-                const data = localStorage.getItem('styleshop_products');
+                const data = localStorage.getItem('novault_products');
                 return data ? JSON.parse(data) : [];
             }
 
             function saveProducts(products) {
-                localStorage.setItem('styleshop_products', JSON.stringify(products));
+                localStorage.setItem('novault_products', JSON.stringify(products));
             }
 
             function getVerificationCodes() {
-                const data = localStorage.getItem('styleshop_verification_codes');
+                const data = localStorage.getItem('novault_verification_codes');
                 return data ? JSON.parse(data) : [];
             }
 
             function saveVerificationCodes(codes) {
-                localStorage.setItem('styleshop_verification_codes', JSON.stringify(codes));
+                localStorage.setItem('novault_verification_codes', JSON.stringify(codes));
             }
 
             function getOrders() {
-                const data = localStorage.getItem('styleshop_orders');
+                const data = localStorage.getItem('novault_orders');
                 return data ? JSON.parse(data) : [];
             }
 
             function saveOrders(orders) {
-                localStorage.setItem('styleshop_orders', JSON.stringify(orders));
+                localStorage.setItem('novault_orders', JSON.stringify(orders));
             }
 
             function getCart() {
-                const data = localStorage.getItem('styleshop_cart');
+                const data = localStorage.getItem('novault_cart');
                 return data ? JSON.parse(data) : [];
             }
 
             function saveCart(cart) {
-                localStorage.setItem('styleshop_cart', JSON.stringify(cart));
+                localStorage.setItem('novault_cart', JSON.stringify(cart));
             }
 
             function getWishlist() {
-                const data = localStorage.getItem('styleshop_wishlist');
+                const data = localStorage.getItem('novault_wishlist');
                 return data ? JSON.parse(data) : [];
             }
 
             function saveWishlist(wishlist) {
-                localStorage.setItem('styleshop_wishlist', JSON.stringify(wishlist));
+                localStorage.setItem('novault_wishlist', JSON.stringify(wishlist));
             }
 
             function getCategories() {
-                const data = localStorage.getItem('styleshop_categories');
+                const data = localStorage.getItem('novault_categories');
                 return data ? JSON.parse(data) : CATEGORY_LIST;
             }
 
             function saveCategories(categories) {
-                localStorage.setItem('styleshop_categories', JSON.stringify(categories));
+                localStorage.setItem('novault_categories', JSON.stringify(categories));
             }
 
             function getAdminPasswordChanged() {
-                return localStorage.getItem('styleshop_admin_pw_changed') === 'true';
+                return localStorage.getItem('novault_admin_pw_changed') === 'true';
             }
 
             function setAdminPasswordChanged() {
-                localStorage.setItem('styleshop_admin_pw_changed', 'true');
+                localStorage.setItem('novault_admin_pw_changed', 'true');
             }
 
             // ============================================================
@@ -1800,7 +1811,7 @@
                     <text x="200" y="250" font-family="-apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif" font-size="28" font-weight="600" fill="${textColor}" text-anchor="middle" dominant-baseline="middle">
                         ${text}
                     </text>
-                    <text x="200" y="300" font-family="-apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif" font-size="14" fill="rgba(255,255,255,0.6)" text-anchor="middle">StyleShop</text>
+                    <text x="200" y="300" font-family="-apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif" font-size="14" fill="rgba(255,255,255,0.6)" text-anchor="middle">NOVAULT</text>
                 </svg>`;
                 return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
             }
@@ -1932,7 +1943,7 @@
 
                     seedProducts.forEach(p => {
                         p.id = generateId('product');
-                        p.brand = 'StyleShop';
+                        p.brand = 'NOVAULT';
                         p.created_at = new Date().toISOString();
                     });
 
@@ -2163,7 +2174,7 @@
                     const newProduct = {
                         id: generateId('product'),
                         name: data.name,
-                        brand: data.brand || 'StyleShop',
+                        brand: data.brand || 'NOVAULT',
                         category: data.category,
                         price: Number(data.price),
                         discount_rate: data.discount_rate ? Number(data.discount_rate) : 0,
@@ -2186,7 +2197,7 @@
                     products[index] = {
                         ...products[index],
                         name: data.name || products[index].name,
-                        brand: data.brand || products[index].brand,
+                        brand: data.brand || products[index].brand || 'NOVAULT',
                         category: data.category || products[index].category,
                         price: data.price !== undefined ? Number(data.price) : products[index].price,
                         discount_rate: data.discount_rate !== undefined ? Number(data
@@ -2617,6 +2628,7 @@
                         <div class="container header-inner">
                             <div class="logo" onclick="navigate('/')">
                                 ${APP_NAME}<span>.</span>
+                                <span class="logo-slogan">${APP_SLOGAN}</span>
                             </div>
                             <nav class="header-nav">
                                 <a href="#/category?category=tops" class="${currentRoute === '/category' && currentParams.category === 'tops' ? 'active' : ''}">상의</a>
@@ -2683,7 +2695,8 @@
                             <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 32px;">
                                 <div>
                                     <div style="font-size: 20px; font-weight: 700; margin-bottom: 8px;">${APP_NAME}<span style="color: var(--point);">.</span></div>
-                                    <p style="font-size: 13px; color: var(--gray-400); max-width: 300px;">프리미엄 패션 편집숍. 매일 새로운 스타일을 만나보세요.</p>
+                                    <p style="font-size: 13px; color: var(--gray-400); max-width: 300px; margin-bottom: 4px;">${APP_SLOGAN}</p>
+                                    <p style="font-size: 12px; color: var(--gray-400);">프리미엄 남성 의류 편집숍</p>
                                 </div>
                                 <div style="display: flex; gap: 48px; flex-wrap: wrap;">
                                     <div>
@@ -2701,7 +2714,7 @@
                                 </div>
                             </div>
                             <div style="border-top: 1px solid var(--gray-200); margin-top: 32px; padding-top: 16px; text-align: center;">
-                                <p style="font-size: 12px; color: var(--gray-400);">© 2026 ${APP_NAME}. All rights reserved.</p>
+                                <p style="font-size: 12px; color: var(--gray-400);">© 2026 ${APP_NAME}. All rights reserved. ${APP_SLOGAN}</p>
                             </div>
                         </div>
                     </footer>
@@ -2731,7 +2744,7 @@
                         <div class="hero-slider" id="hero-slider">
                             <div class="hero-slide" style="background: linear-gradient(135deg, #1D1D1F, #2C3E50);">
                                 <h1>새로운 시즌,<br>새로운 스타일</h1>
-                                <p>프리미엄 패션을 만나보세요</p>
+                                <p>${APP_SLOGAN} 프리미엄 패션을 만나보세요</p>
                                 <button class="hero-btn" onclick="navigate('/category')">쇼핑 시작하기</button>
                             </div>
                             <div class="hero-slide" style="background: linear-gradient(135deg, #2C3E50, #34495E);">
@@ -2834,7 +2847,7 @@
                             ${isSoldOut ? '<div class="product-card-badge soldout">품절</div>' : ''}
                         </div>
                         <div class="product-card-body">
-                            <div class="product-card-brand">${escapeHtml(product.brand || 'StyleShop')}</div>
+                            <div class="product-card-brand">${escapeHtml(product.brand || 'NOVAULT')}</div>
                             <div class="product-card-name">${escapeHtml(product.name)}</div>
                             <div class="product-card-price-row">
                                 <span class="product-card-price">${formatPrice(discountedPrice)}</span>
@@ -3020,7 +3033,7 @@
 
                                 <!-- Info -->
                                 <div class="product-info">
-                                    <div class="brand">${escapeHtml(product.brand || 'StyleShop')}</div>
+                                    <div class="brand">${escapeHtml(product.brand || 'NOVAULT')}</div>
                                     <h1>${escapeHtml(product.name)}</h1>
                                     <div class="price-row">
                                         <span class="price">${formatPrice(discountedPrice)}</span>
@@ -3606,4 +3619,1229 @@
                             <button type="submit" class="btn btn-primary" style="width: 100%;" id="signup-submit-btn" disabled>
                                 가입하기
                             </button>
-                            <p style="text-align: center; margin-top: 16px; font-size: 13px; color: var(--gray-400
+                            <p style="text-align: center; margin-top: 16px; font-size: 13px; color: var(--gray-400);">이미 계정이 있으신가요? <a href="#/login" style="color: var(--point);">로그인</a></p>
+                        </form>
+                    </section>
+                `;
+
+                // Password checklist logic
+                const passwordInput = document.getElementById('signup-password');
+                const checklist = document.getElementById('password-checklist');
+                passwordInput.addEventListener('input', () => {
+                    const value = passwordInput.value;
+                    checklist.style.display = value.length > 0 ? 'flex' : 'none';
+
+                    const checks = {
+                        'pw-length': value.length >= 8,
+                        'pw-letter': /[a-zA-Z]/.test(value),
+                        'pw-number': /[0-9]/.test(value),
+                        'pw-special': /[^a-zA-Z0-9]/.test(value)
+                    };
+
+                    Object.keys(checks).forEach(id => {
+                        const item = document.getElementById(id);
+                        const icon = item.querySelector('.check-icon');
+                        if (checks[id]) {
+                            item.classList.add('valid');
+                            icon.textContent = '✓';
+                        } else {
+                            item.classList.remove('valid');
+                            icon.textContent = '○';
+                        }
+                    });
+                });
+
+                // Form submit
+                const form = document.getElementById('signup-form');
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    handleSignupSubmit();
+                });
+
+                // Update button state
+                updateSignupButtonState();
+            }
+
+            // ============================================================
+            //  SECTION 19: SIGNUP FUNCTIONS (Email/Phone Verification)
+            // ============================================================
+
+            let emailTimerInterval = null;
+            let phoneTimerInterval = null;
+
+            function handleSendEmailCode() {
+                const emailInput = document.getElementById('signup-email');
+                const email = emailInput.value.trim();
+                const errorEl = document.getElementById('signup-email-error');
+                const codeGroup = document.getElementById('email-code-group');
+                const badgeEl = document.getElementById('email-verified-badge');
+
+                errorEl.style.display = 'none';
+
+                if (!email) {
+                    errorEl.textContent = '이메일을 입력해주세요.';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    errorEl.textContent = '올바른 이메일 형식이 아닙니다.';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+
+                const code = AuthService.sendVerificationCode(email, 'email');
+                codeGroup.style.display = 'block';
+                badgeEl.innerHTML = '';
+                showDevModeToast(code);
+                showToast('인증번호가 발송되었습니다. (개발 모드: 화면 확인)', 'info');
+
+                // Start countdown
+                if (emailTimerInterval) clearInterval(emailTimerInterval);
+                startEmailCountdown();
+            }
+
+            function startEmailCountdown() {
+                const timerEl = document.getElementById('email-code-timer');
+                let seconds = AuthService.getRemainingTime(document.getElementById('signup-email').value.trim(), 'email');
+
+                const updateTimer = () => {
+                    timerEl.textContent = Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
+                    if (seconds <= 0) {
+                        clearInterval(emailTimerInterval);
+                        timerEl.textContent = '만료';
+                        const sendBtn = document.getElementById('send-email-code-btn');
+                        sendBtn.textContent = '재전송';
+                    }
+                    seconds--;
+                };
+
+                updateTimer();
+                emailTimerInterval = setInterval(updateTimer, 1000);
+            }
+
+            function handleVerifyEmailCode() {
+                const emailInput = document.getElementById('signup-email');
+                const email = emailInput.value.trim();
+                const codeInput = document.getElementById('signup-email-code');
+                const code = codeInput.value.trim();
+                const errorEl = document.getElementById('signup-email-code-error');
+                const badgeEl = document.getElementById('email-verified-badge');
+                const codeGroup = document.getElementById('email-code-group');
+
+                errorEl.style.display = 'none';
+
+                if (!email) {
+                    showToast('이메일을 먼저 입력해주세요.', 'error');
+                    return;
+                }
+
+                if (!code || code.length !== 6) {
+                    errorEl.textContent = '6자리 인증번호를 입력해주세요.';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+
+                const result = AuthService.verifyCode(email, 'email', code);
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    badgeEl.innerHTML = '<span class="verified-badge">✓ 인증 완료</span>';
+                    codeGroup.style.display = 'none';
+                    if (emailTimerInterval) clearInterval(emailTimerInterval);
+                    updateSignupButtonState();
+                } else {
+                    errorEl.textContent = result.message;
+                    errorEl.style.display = 'block';
+                }
+            }
+
+            function handleSendPhoneCode() {
+                const phoneInput = document.getElementById('signup-phone');
+                const phone = phoneInput.value.trim();
+                const errorEl = document.getElementById('signup-phone-error');
+                const codeGroup = document.getElementById('phone-code-group');
+                const badgeEl = document.getElementById('phone-verified-badge');
+
+                errorEl.style.display = 'none';
+
+                if (!phone) {
+                    errorEl.textContent = '휴대폰번호를 입력해주세요.';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+                if (!/^01[0-9]{8,9}$/.test(phone.replace(/-/g, ''))) {
+                    errorEl.textContent = '올바른 휴대폰번호 형식이 아닙니다.';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+
+                const normalizedPhone = phone.replace(/-/g, '');
+                const code = AuthService.sendVerificationCode(normalizedPhone, 'phone');
+                codeGroup.style.display = 'block';
+                badgeEl.innerHTML = '';
+                showDevModeToast(code);
+                showToast('인증번호가 발송되었습니다. (개발 모드: 화면 확인)', 'info');
+
+                if (phoneTimerInterval) clearInterval(phoneTimerInterval);
+                startPhoneCountdown();
+            }
+
+            function startPhoneCountdown() {
+                const timerEl = document.getElementById('phone-code-timer');
+                const phone = document.getElementById('signup-phone').value.trim().replace(/-/g, '');
+                let seconds = AuthService.getRemainingTime(phone, 'phone');
+
+                const updateTimer = () => {
+                    timerEl.textContent = Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
+                    if (seconds <= 0) {
+                        clearInterval(phoneTimerInterval);
+                        timerEl.textContent = '만료';
+                        const sendBtn = document.getElementById('send-phone-code-btn');
+                        sendBtn.textContent = '재전송';
+                    }
+                    seconds--;
+                };
+
+                updateTimer();
+                phoneTimerInterval = setInterval(updateTimer, 1000);
+            }
+
+            function handleVerifyPhoneCode() {
+                const phoneInput = document.getElementById('signup-phone');
+                const phone = phoneInput.value.trim().replace(/-/g, '');
+                const codeInput = document.getElementById('signup-phone-code');
+                const code = codeInput.value.trim();
+                const errorEl = document.getElementById('signup-phone-code-error');
+                const badgeEl = document.getElementById('phone-verified-badge');
+                const codeGroup = document.getElementById('phone-code-group');
+
+                errorEl.style.display = 'none';
+
+                if (!phone) {
+                    showToast('휴대폰번호를 먼저 입력해주세요.', 'error');
+                    return;
+                }
+
+                if (!code || code.length !== 6) {
+                    errorEl.textContent = '6자리 인증번호를 입력해주세요.';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+
+                const result = AuthService.verifyCode(phone, 'phone', code);
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    badgeEl.innerHTML = '<span class="verified-badge">✓ 인증 완료</span>';
+                    codeGroup.style.display = 'none';
+                    if (phoneTimerInterval) clearInterval(phoneTimerInterval);
+                    updateSignupButtonState();
+                } else {
+                    errorEl.textContent = result.message;
+                    errorEl.style.display = 'block';
+                }
+            }
+
+            function handleAgreeAll(checkbox) {
+                const requiredChecks = document.querySelectorAll('.required-agreement');
+                const marketingCheck = document.getElementById('agree-marketing');
+                requiredChecks.forEach(c => c.checked = checkbox.checked);
+                marketingCheck.checked = checkbox.checked;
+                updateSignupButtonState();
+            }
+
+            function updateSignupButtonState() {
+                const submitBtn = document.getElementById('signup-submit-btn');
+                if (!submitBtn) return;
+
+                const email = document.getElementById('signup-email').value.trim();
+                const password = document.getElementById('signup-password').value;
+                const passwordConfirm = document.getElementById('signup-password-confirm').value;
+                const name = document.getElementById('signup-name').value.trim();
+                const agreeTerms = document.getElementById('agree-terms').checked;
+                const agreePrivacy = document.getElementById('agree-privacy').checked;
+                const emailVerified = AuthService.isVerified(email, 'email');
+
+                const passwordValid = password.length >= 8 &&
+                    /[a-zA-Z]/.test(password) &&
+                    /[0-9]/.test(password) &&
+                    /[^a-zA-Z0-9]/.test(password);
+                const passwordMatch = password === passwordConfirm && password !== '';
+
+                const isValid = email &&
+                    passwordValid &&
+                    passwordMatch &&
+                    name &&
+                    agreeTerms &&
+                    agreePrivacy &&
+                    emailVerified;
+
+                submitBtn.disabled = !isValid;
+            }
+
+            // Watch for changes
+            document.addEventListener('input', (e) => {
+                if (e.target.matches('#signup-form input')) {
+                    updateSignupButtonState();
+                }
+            });
+            document.addEventListener('change', (e) => {
+                if (e.target.matches('#signup-form input[type="checkbox"]')) {
+                    updateSignupButtonState();
+                }
+            });
+
+            function handleSignupSubmit() {
+                const email = document.getElementById('signup-email').value.trim();
+                const password = document.getElementById('signup-password').value;
+                const passwordConfirm = document.getElementById('signup-password-confirm').value;
+                const name = document.getElementById('signup-name').value.trim();
+                const phone = document.getElementById('signup-phone').value.trim().replace(/-/g, '');
+                const agreeTerms = document.getElementById('agree-terms').checked;
+                const agreePrivacy = document.getElementById('agree-privacy').checked;
+
+                const emailVerified = AuthService.isVerified(email, 'email');
+                const phoneVerified = AuthService.isVerified(phone, 'phone');
+
+                if (!emailVerified) {
+                    showToast('이메일 인증을 완료해주세요.', 'error');
+                    return;
+                }
+
+                if (!agreeTerms || !agreePrivacy) {
+                    const termsError = document.getElementById('signup-terms-error');
+                    termsError.textContent = '필수 약관에 동의해주세요.';
+                    termsError.style.display = 'block';
+                    return;
+                }
+
+                const result = AuthService.register({
+                    email,
+                    password,
+                    phone,
+                    name,
+                    email_verified: emailVerified,
+                    phone_verified: phoneVerified
+                });
+
+                if (result.success) {
+                    showToast(result.message, 'success');
+                    navigate('/login');
+                } else {
+                    showToast(result.message, 'error');
+                }
+            }
+
+            // ============================================================
+            //  SECTION 20: FORGOT PASSWORD PAGE
+            // ============================================================
+
+            function renderForgotPasswordPage(container) {
+                container.innerHTML = `
+                    <section style="padding-top: 60px; max-width: 440px; margin: 0 auto; padding-left: 24px; padding-right: 24px;">
+                        <div style="text-align: center; margin-bottom: 40px;">
+                            <div style="font-size: 32px; font-weight: 700; letter-spacing: -1px;">비밀번호 찾기</div>
+                            <p style="font-size: 14px; color: var(--gray-400); margin-top: 8px;">가입하신 이메일로 재설정 안내를 보내드립니다</p>
+                        </div>
+                        <form id="forgot-form" novalidate>
+                            <div class="form-group">
+                                <label for="forgot-email">이메일</label>
+                                <input type="email" id="forgot-email" placeholder="가입한 이메일을 입력하세요">
+                                <div class="hint" id="forgot-email-error" style="color: var(--red); display: none;"></div>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 16px;">재설정 이메일 보내기</button>
+                        </form>
+                        <div style="text-align: center;">
+                            <span class="section-link" onclick="navigate('/login')">로그인으로 돌아가기</span>
+                        </div>
+                        <div style="text-align: center; margin-top: 24px; padding: 16px; background: var(--gray-bg); border-radius: var(--radius-sm);">
+                            <p style="font-size: 12px; color: var(--gray-400);">개발 모드: 이메일을 입력하면 화면에 안내가 표시됩니다.</p>
+                        </div>
+                    </section>
+                `;
+
+                const form = document.getElementById('forgot-form');
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const email = document.getElementById('forgot-email').value.trim();
+                    const errorEl = document.getElementById('forgot-email-error');
+
+                    errorEl.style.display = 'none';
+
+                    if (!email) {
+                        errorEl.textContent = '이메일을 입력해주세요.';
+                        errorEl.style.display = 'block';
+                        return;
+                    }
+
+                    const users = getUsers();
+                    const user = users.find(u => u.email === email);
+                    if (!user) {
+                        errorEl.textContent = '등록되지 않은 이메일입니다.';
+                        errorEl.style.display = 'block';
+                        return;
+                    }
+
+                    showToast('비밀번호 재설정 안내를 발송했습니다. (개발 모드)', 'success');
+                    showModal('비밀번호 재설정', `
+                        <p style="font-size: 14px; margin-bottom: 12px;">새 비밀번호를 입력해주세요.</p>
+                        <div class="form-group">
+                            <label>새 비밀번호</label>
+                            <input type="password" id="reset-password" placeholder="새 비밀번호">
+                        </div>
+                        <div class="form-group">
+                            <label>새 비밀번호 확인</label>
+                            <input type="password" id="reset-password-confirm" placeholder="새 비밀번호 확인">
+                        </div>
+                    `, [
+                        { text: '취소', className: 'btn-secondary' },
+                        { text: '변경하기', className: 'btn-primary', onClick: () => {
+                            const newPassword = document.getElementById('reset-password').value;
+                            const confirmPassword = document.getElementById('reset-password-confirm').value;
+                            if (newPassword !== confirmPassword) {
+                                showToast('비밀번호가 일치하지 않습니다.', 'error');
+                                return;
+                            }
+                            const result = AuthService.resetPassword(email, newPassword);
+                            showToast(result.message, result.success ? 'success' : 'error');
+                            if (result.success) navigate('/login');
+                        }}
+                    ]);
+                });
+            }
+
+            // ============================================================
+            //  SECTION 21: MY PAGE
+            // ============================================================
+
+            function renderMyPage(container) {
+                const user = getCurrentUser();
+                if (!user) {
+                    navigate('/login');
+                    return;
+                }
+
+                const orders = OrderService.getUserOrders();
+
+                container.innerHTML = `
+                    <section style="padding-top: 40px;">
+                        <div class="container">
+                            <h1 style="font-size: 32px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 8px;">마이페이지</h1>
+                            <p style="font-size: 14px; color: var(--gray-400); margin-bottom: 32px;">${escapeHtml(user.name)} 님, 환영합니다.</p>
+
+                            <!-- Profile Card -->
+                            <div style="background: var(--gray-bg); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 32px;">
+                                <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">프로필</h3>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; font-size: 14px;">
+                                    <div><strong>이메일:</strong> ${escapeHtml(user.email)}</div>
+                                    <div><strong>이름:</strong> ${escapeHtml(user.name)}</div>
+                                    <div><strong>휴대폰:</strong> ${escapeHtml(user.phone || '미등록')}</div>
+                                    <div><strong>가입일:</strong> ${formatDate(user.created_at)}</div>
+                                </div>
+                                <div style="margin-top: 16px; display: flex; gap: 8px;">
+                                    <button class="btn btn-secondary btn-small" onclick="showEditProfileModal()">프로필 수정</button>
+                                    <button class="btn btn-outline btn-small" onclick="showChangePasswordModal()">비밀번호 변경</button>
+                                </div>
+                            </div>
+
+                            <!-- Orders -->
+                            <h2 style="font-size: 24px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 16px;">주문 내역</h2>
+                            ${orders.length > 0 ? `
+                                <div class="cart-list">
+                                    ${orders.map(order => `
+                                        <div class="cart-item">
+                                            <div class="cart-item-info">
+                                                <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                                                    <div>
+                                                        <div style="font-size: 13px; color: var(--gray-400);">주문번호: ${order.id.substring(0, 15)}...</div>
+                                                        <div style="font-size: 12px; color: var(--gray-400);">${formatDate(order.created_at)}</div>
+                                                    </div>
+                                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                                        <span style="font-size: 13px; font-weight: 600; color: var(--point);">${order.status}</span>
+                                                        <span style="font-size: 16px; font-weight: 700;">${formatPrice(order.total_price)}</span>
+                                                    </div>
+                                                </div>
+                                                <div style="font-size: 13px; color: var(--gray-500); margin-top: 8px;">
+                                                    ${order.items.map(item => `${item.product_name} (${item.size}/${item.color}) x${item.quantity}`).join(', ')}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : renderEmptyState('📦', '주문 내역이 없습니다.')}
+
+                            <!-- Quick Links -->
+                            <div style="display: flex; gap: 12px; margin-top: 32px; flex-wrap: wrap;">
+                                <button class="btn btn-secondary" onclick="navigate('/wishlist')">♥ 위시리스트</button>
+                                <button class="btn btn-secondary" onclick="navigate('/cart')">🛒 장바구니</button>
+                                <button class="btn btn-danger" onclick="handleLogout()">로그아웃</button>
+                            </div>
+                        </div>
+                    </section>
+                `;
+            }
+
+            function showEditProfileModal() {
+                const user = getCurrentUser();
+                showModal('프로필 수정', `
+                    <div class="form-group">
+                        <label>이름</label>
+                        <input type="text" id="edit-name" value="${escapeHtml(user.name)}">
+                    </div>
+                    <div class="form-group">
+                        <label>휴대폰번호</label>
+                        <input type="tel" id="edit-phone" value="${escapeHtml(user.phone || '')}">
+                    </div>
+                `, [
+                    { text: '취소', className: 'btn-secondary' },
+                    { text: '저장', className: 'btn-primary', onClick: () => {
+                        const name = document.getElementById('edit-name').value.trim();
+                        const phone = document.getElementById('edit-phone').value.trim();
+                        if (!name) {
+                            showToast('이름을 입력해주세요.', 'error');
+                            return;
+                        }
+                        const result = AuthService.updateProfile(user.id, { name, phone });
+                        showToast(result.message, result.success ? 'success' : 'error');
+                        if (result.success) renderMyPage(document.getElementById('main-content'));
+                    }}
+                ]);
+            }
+
+            function showChangePasswordModal() {
+                const user = getCurrentUser();
+                showModal('비밀번호 변경', `
+                    <div class="form-group">
+                        <label>새 비밀번호</label>
+                        <input type="password" id="change-password" placeholder="새 비밀번호">
+                    </div>
+                    <div class="form-group">
+                        <label>새 비밀번호 확인</label>
+                        <input type="password" id="change-password-confirm" placeholder="새 비밀번호 확인">
+                    </div>
+                `, [
+                    { text: '취소', className: 'btn-secondary' },
+                    { text: '변경', className: 'btn-primary', onClick: () => {
+                        const newPassword = document.getElementById('change-password').value;
+                        const confirmPassword = document.getElementById('change-password-confirm').value;
+                        if (newPassword !== confirmPassword) {
+                            showToast('비밀번호가 일치하지 않습니다.', 'error');
+                            return;
+                        }
+                        if (!(newPassword.length >= 8 && /[a-zA-Z]/.test(newPassword) && /[0-9]/.test(newPassword) && /[^a-zA-Z0-9]/.test(newPassword))) {
+                            showToast('비밀번호 규칙을 확인해주세요.', 'error');
+                            return;
+                        }
+                        const result = AuthService.changePassword(user.id, newPassword);
+                        showToast(result.message, result.success ? 'success' : 'error');
+                    }}
+                ]);
+            }
+
+            // ============================================================
+            //  SECTION 22: ADMIN ROUTES
+            // ============================================================
+
+            function renderAdminRoute(path, queryParams) {
+                const headerContainer = document.getElementById('header-container');
+                const mobileNavContainer = document.getElementById('mobile-nav-container');
+                const mainContent = document.getElementById('main-content');
+                const footer = document.getElementById('footer-container');
+
+                // Hide regular header/footer/mobile nav for admin
+                headerContainer.innerHTML = '';
+                mobileNavContainer.innerHTML = '';
+                footer.innerHTML = '';
+
+                if (path === '/admin/login') {
+                    renderAdminLoginPage(mainContent);
+                    return;
+                }
+
+                if (!isAdminUser()) {
+                    showToast('관리자 로그인이 필요합니다.', 'error');
+                    navigate('/admin/login');
+                    return;
+                }
+
+                // Render admin layout
+                mainContent.innerHTML = `
+                    <div class="admin-layout">
+                        <div class="admin-sidebar">
+                            <div class="admin-brand">${APP_NAME} ADMIN</div>
+                            <div class="admin-sidebar-item ${path === '/admin' ? 'active' : ''}" onclick="navigate('/admin')">
+                                📊 대시보드
+                            </div>
+                            <div class="admin-sidebar-item ${path === '/admin/products' || path === '/admin/products/new' || path === '/admin/products/edit' ? 'active' : ''}" onclick="navigate('/admin/products')">
+                                👕 상품 관리
+                            </div>
+                            <div class="admin-sidebar-item ${path === '/admin/orders' ? 'active' : ''}" onclick="navigate('/admin/orders')">
+                                📦 주문 관리
+                            </div>
+                            <div class="admin-sidebar-item ${path === '/admin/users' ? 'active' : ''}" onclick="navigate('/admin/users')">
+                                👥 회원 관리
+                            </div>
+                            <div class="admin-sidebar-item ${path === '/admin/categories' ? 'active' : ''}" onclick="navigate('/admin/categories')">
+                                🗂️ 카테고리 관리
+                            </div>
+                            <div class="admin-sidebar-item" onclick="handleLogout()" style="margin-top: auto;">
+                                🚪 로그아웃
+                            </div>
+                        </div>
+                        <div class="admin-content">
+                            ${renderAdminContent(path, queryParams)}
+                        </div>
+                    </div>
+                `;
+            }
+
+            function renderAdminLoginPage(container) {
+                container.innerHTML = `
+                    <section style="max-width: 440px; margin: 60px auto; padding: 24px;">
+                        <div style="text-align: center; margin-bottom: 40px;">
+                            <div style="font-size: 28px; font-weight: 700; letter-spacing: -1px;">${APP_NAME} 관리자</div>
+                            <p style="font-size: 14px; color: var(--gray-400); margin-top: 8px;">관리자 계정으로 로그인하세요</p>
+                        </div>
+                        <form id="admin-login-form" novalidate>
+                            <div class="form-group">
+                                <label>관리자 이메일</label>
+                                <input type="email" id="admin-email" placeholder="admin@shopmall.com" value="admin@shopmall.com">
+                                <div class="hint" id="admin-email-error" style="color: var(--red); display: none;"></div>
+                            </div>
+                            <div class="form-group">
+                                <label>비밀번호</label>
+                                <input type="password" id="admin-password" placeholder="비밀번호" value="Admin1234!">
+                                <div class="hint" id="admin-password-error" style="color: var(--red); display: none;"></div>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">로그인</button>
+                        </form>
+                        <div style="text-align: center; margin-top: 16px; padding: 16px; background: #FFF3CD; border-radius: var(--radius-sm);">
+                            <p style="font-size: 12px; color: #856404; font-weight: 500;">⚠️ 기본 관리자 계정은 반드시 비밀번호를 변경하거나 삭제하세요!</p>
+                        </div>
+                    </section>
+                `;
+
+                const form = document.getElementById('admin-login-form');
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const email = document.getElementById('admin-email').value.trim();
+                    const password = document.getElementById('admin-password').value;
+                    const emailError = document.getElementById('admin-email-error');
+                    const passwordError = document.getElementById('admin-password-error');
+
+                    emailError.style.display = 'none';
+                    passwordError.style.display = 'none';
+
+                    if (!email) {
+                        emailError.textContent = '이메일을 입력해주세요.';
+                        emailError.style.display = 'block';
+                        return;
+                    }
+                    if (!password) {
+                        passwordError.textContent = '비밀번호를 입력해주세요.';
+                        passwordError.style.display = 'block';
+                        return;
+                    }
+
+                    const result = AuthService.login(email, password, false);
+                    if (result.success && result.user.is_admin) {
+                        showToast('관리자 로그인 성공', 'success');
+                        if (!getAdminPasswordChanged()) {
+                            showModal('비밀번호 변경 안내', `
+                                <p style="font-size: 14px; margin-bottom: 12px;">보안을 위해 초기 비밀번호를 변경해주세요.</p>
+                                <p style="font-size: 12px; color: var(--red); margin-bottom: 16px;">⚠️ 실서비스 배포 전 반드시 변경하거나 계정을 삭제하세요!</p>
+                                <div class="form-group">
+                                    <label>새 비밀번호</label>
+                                    <input type="password" id="admin-new-password">
+                                </div>
+                                <div class="form-group">
+                                    <label>새 비밀번호 확인</label>
+                                    <input type="password" id="admin-new-password-confirm">
+                                </div>
+                            `, [
+                                { text: '나중에', className: 'btn-secondary', onClick: () => { navigate('/admin'); } },
+                                { text: '변경', className: 'btn-primary', onClick: () => {
+                                    const newPw = document.getElementById('admin-new-password').value;
+                                    const confirmPw = document.getElementById('admin-new-password-confirm').value;
+                                    if (newPw !== confirmPw) {
+                                        showToast('비밀번호가 일치하지 않습니다.', 'error');
+                                        return;
+                                    }
+                                    if (!(newPw.length >= 8 && /[a-zA-Z]/.test(newPw) && /[0-9]/.test(newPw) && /[^a-zA-Z0-9]/.test(newPw))) {
+                                        showToast('비밀번호 규칙을 확인해주세요.', 'error');
+                                        return;
+                                    }
+                                    const result = AuthService.changePassword(result.user.id, newPw);
+                                    if (result.success) {
+                                        setAdminPasswordChanged();
+                                        showToast('비밀번호가 변경되었습니다.', 'success');
+                                        navigate('/admin');
+                                    }
+                                }}
+                            ]);
+                        } else {
+                            navigate('/admin');
+                        }
+                    } else if (result.success) {
+                        showToast('관리자 계정이 아닙니다.', 'error');
+                        AuthService.logout();
+                    } else {
+                        showToast(result.message, 'error');
+                    }
+                });
+            }
+
+            function renderAdminContent(path, queryParams) {
+                switch (path) {
+                    case '/admin':
+                        return renderAdminDashboard();
+                    case '/admin/products':
+                        return renderAdminProducts();
+                    case '/admin/products/new':
+                        return renderAdminProductForm(null);
+                    case '/admin/products/edit':
+                        return renderAdminProductForm(queryParams.id);
+                    case '/admin/orders':
+                        return renderAdminOrders();
+                    case '/admin/users':
+                        return renderAdminUsers();
+                    case '/admin/categories':
+                        return renderAdminCategories();
+                    default:
+                        return renderAdminDashboard();
+                }
+            }
+
+            function renderAdminDashboard() {
+                const orders = OrderService.getAllOrders();
+                const users = getUsers().filter(u => !u.is_admin);
+                const products = ProductService.getAllProducts();
+                const todayOrders = orders.filter(o => new Date(o.created_at).toDateString() === new Date().toDateString());
+                const monthOrders = orders.filter(o => {
+                    const now = new Date();
+                    const orderDate = new Date(o.created_at);
+                    return orderDate.getMonth() === now.getMonth() && orderDate.getFullYear() === now.getFullYear();
+                });
+                const monthRevenue = monthOrders.reduce((sum, o) => sum + o.total_price, 0);
+                const lowStockProducts = products.filter(p => p.options.some(o => o.stock <= 5));
+
+                return `
+                    <h2 style="font-size: 24px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 24px;">대시보드</h2>
+                    <div class="admin-stats-grid">
+                        <div class="admin-stat-card">
+                            <div class="label">오늘 주문 수</div>
+                            <div class="value">${todayOrders.length}건</div>
+                        </div>
+                        <div class="admin-stat-card">
+                            <div class="label">이번 달 매출</div>
+                            <div class="value">${formatPrice(monthRevenue)}</div>
+                        </div>
+                        <div class="admin-stat-card">
+                            <div class="label">신규 가입자 수</div>
+                            <div class="value">${users.filter(u => new Date(u.created_at).toDateString() === new Date().toDateString()).length}명</div>
+                        </div>
+                        <div class="admin-stat-card">
+                            <div class="label">재고 부족 상품</div>
+                            <div class="value" style="color: ${lowStockProducts.length > 0 ? 'var(--red)' : 'var(--green)'};">${lowStockProducts.length}개</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="navigate('/admin/products/new')">+ 상품 등록</button>
+                        <button class="btn btn-secondary" onclick="navigate('/admin/products')">상품 관리</button>
+                        <button class="btn btn-secondary" onclick="navigate('/admin/orders')">주문 관리</button>
+                    </div>
+                `;
+            }
+
+            function renderAdminProducts() {
+                const products = ProductService.getAllProducts();
+                return `
+                    <h2 style="font-size: 24px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 16px;">상품 관리</h2>
+                    <button class="btn btn-primary" style="margin-bottom: 16px;" onclick="navigate('/admin/products/new')">+ 새 상품 등록</button>
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>이미지</th>
+                                <th>상품명</th>
+                                <th>카테고리</th>
+                                <th>가격</th>
+                                <th>할인율</th>
+                                <th>재고</th>
+                                <th>노출</th>
+                                <th>관리</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${products.map(p => {
+                                const mainImage = p.images && p.images.length > 0 ? p.images.find(i => i.is_thumbnail) || p.images[0] : null;
+                                const imageUrl = mainImage ? mainImage.url : generatePlaceholderImage('상품', '#E8E8ED', '#86868B');
+                                const totalStock = p.options.reduce((sum, o) => sum + o.stock, 0);
+                                return `
+                                    <tr>
+                                        <td><img src="${imageUrl}" alt="${escapeHtml(p.name)}" onerror="this.onerror=null; this.src='${generatePlaceholderImage('상품', '#E8E8ED', '#86868B')}';"></td>
+                                        <td><strong>${escapeHtml(p.name)}</strong></td>
+                                        <td>${escapeHtml(p.category)}</td>
+                                        <td>${formatPrice(p.price)}</td>
+                                        <td>${p.discount_rate}%</td>
+                                        <td>${totalStock}</td>
+                                        <td>${p.is_active ? '✅ 공개' : '❌ 비공개'}</td>
+                                        <td>
+                                            <button class="btn btn-small btn-secondary" onclick="navigate('/admin/products/edit?id=${p.id}')">수정</button>
+                                            <button class="btn btn-small btn-danger" onclick="handleDeleteProduct('${p.id}')">삭제</button>
+                                            <button class="btn btn-small btn-outline" onclick="handleToggleProduct('${p.id}')">${p.is_active ? '비공개' : '공개'}</button>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                `;
+            }
+
+            function renderAdminProductForm(productId) {
+                const product = productId ? ProductService.getProductById(productId) : null;
+                const categories = getCategories();
+                const images = product ? safeArray(product.images) : [];
+                const options = product ? safeArray(product.options) : [];
+
+                return `
+                    <h2 style="font-size: 24px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 24px;">
+                        ${product ? '상품 수정' : '새 상품 등록'}
+                    </h2>
+                    <form id="admin-product-form" style="max-width: 800px;">
+                        <div class="form-group">
+                            <label>상품명 *</label>
+                            <input type="text" id="product-name" value="${product ? escapeHtml(product.name) : ''}" placeholder="상품명을 입력하세요">
+                        </div>
+                        <div class="form-group">
+                            <label>브랜드</label>
+                            <input type="text" id="product-brand" value="${product ? escapeHtml(product.brand || 'NOVAULT') : 'NOVAULT'}" placeholder="브랜드명">
+                        </div>
+                        <div class="form-group">
+                            <label>카테고리 *</label>
+                            <select id="product-category">
+                                ${categories.map(c => `
+                                    <option value="${c.id}" ${product && product.category === c.id ? 'selected' : ''}>${c.name}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>정가 *</label>
+                                <input type="number" id="product-price" value="${product ? product.price : ''}" placeholder="예: 59000">
+                            </div>
+                            <div class="form-group">
+                                <label>할인율 (%)</label>
+                                <input type="number" id="product-discount" value="${product ? product.discount_rate : 0}" min="0" max="90">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>재고 수량 (전체)</label>
+                            <input type="number" id="product-stock" value="${product ? product.options.reduce((s, o) => s + o.stock, 0) : 100}" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>사이즈 옵션 (쉼표로 구분)</label>
+                            <input type="text" id="product-sizes" value="${product ? [...new Set(options.map(o => o.size))].join(', ') : 'S, M, L, XL'}">
+                        </div>
+                        <div class="form-group">
+                            <label>색상 옵션 (쉼표로 구분)</label>
+                            <input type="text" id="product-colors" value="${product ? [...new Set(options.map(o => o.color))].join(', ') : 'Black, White, Navy'}">
+                        </div>
+                        <div class="form-group">
+                            <label>상품 상세설명</label>
+                            <textarea id="product-description" rows="5">${product ? escapeHtml(product.description || '') : ''}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>노출 여부</label>
+                            <select id="product-active">
+                                <option value="true" ${product && product.is_active !== false ? 'selected' : ''}>공개</option>
+                                <option value="false" ${product && product.is_active === false ? 'selected' : ''}>비공개</option>
+                            </select>
+                        </div>
+
+                        <!-- Image Upload -->
+                        <div class="form-group">
+                            <label>상품 이미지 (대표 이미지 1장 + 서브 이미지 여러 장)</label>
+                            <div class="image-upload-dropzone" id="image-dropzone" onclick="document.getElementById('file-input').click()">
+                                클릭하여 이미지를 업로드하세요 (여러 장 가능)
+                            </div>
+                            <input type="file" id="file-input" accept="image/*" multiple style="display: none;" onchange="handleImageUpload(event)">
+                            <div class="image-upload-grid" id="image-upload-grid">
+                                ${images.map((img, i) => `
+                                    <div class="image-upload-item ${img.is_thumbnail ? 'is-thumbnail' : ''}" data-index="${i}" draggable="true">
+                                        <img src="${img.url}" alt="상품 이미지 ${i + 1}" onerror="this.onerror=null; this.src='${generatePlaceholderImage('상품', '#E8E8ED', '#86868B')}';">
+                                        ${img.is_thumbnail ? '<div class="thumb-badge">대표</div>' : ''}
+                                        <div class="delete-btn" onclick="removeUploadedImage(${i})">✕</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 12px; margin-top: 24px;">
+                            <button type="button" class="btn btn-secondary" onclick="navigate('/admin/products')">취소</button>
+                            <button type="submit" class="btn btn-primary">${product ? '수정하기' : '등록하기'}</button>
+                        </div>
+                    </form>
+
+                    <script>
+                        window._uploadedImages = ${JSON.stringify(images)};
+                        window._isEditing = ${product ? 'true' : 'false'};
+                        window._editingProductId = ${product ? "'" + product.id + "'" : 'null'};
+                    </script>
+                `;
+            }
+
+            function renderAdminOrders() {
+                const orders = OrderService.getAllOrders();
+                return `
+                    <h2 style="font-size: 24px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 16px;">주문 관리</h2>
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>주문번호</th>
+                                <th>고객</th>
+                                <th>상품</th>
+                                <th>총 금액</th>
+                                <th>주문일시</th>
+                                <th>상태</th>
+                                <th>관리</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${orders.map(o => `
+                                <tr>
+                                    <td>${o.id.substring(0, 10)}...</td>
+                                    <td>${escapeHtml(o.user_name)}</td>
+                                    <td>${o.items.map(i => i.product_name).join(', ')}</td>
+                                    <td>${formatPrice(o.total_price)}</td>
+                                    <td>${formatDate(o.created_at)}</td>
+                                    <td>
+                                        <select onchange="handleUpdateOrderStatus('${o.id}', this.value)" style="width: auto;">
+                                            ${ORDER_STATUSES.map(status => `
+                                                <option value="${status}" ${o.status === status ? 'selected' : ''}>${status}</option>
+                                            `).join('')}
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-small btn-secondary" onclick="showOrderDetail('${o.id}')">상세</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            }
+
+            function renderAdminUsers() {
+                const users = getUsers().filter(u => !u.is_admin);
+                return `
+                    <h2 style="font-size: 24px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 16px;">회원 관리</h2>
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>이름</th>
+                                <th>이메일</th>
+                                <th>휴대폰</th>
+                                <th>이메일 인증</th>
+                                <th>가입일</th>
+                                <th>관리</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${users.map(u => `
+                                <tr>
+                                    <td><strong>${escapeHtml(u.name)}</strong></td>
+                                    <td>${escapeHtml(u.email)}</td>
+                                    <td>${escapeHtml(u.phone || '-')}</td>
+                                    <td>${u.email_verified ? '✅' : '❌'}</td>
+                                    <td>${formatDate(u.created_at)}</td>
+                                    <td>
+                                        <button class="btn btn-small btn-danger" onclick="handleDeleteUser('${u.id}')">삭제</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            }
+
+            function renderAdminCategories() {
+                const categories = getCategories();
+                return `
+                    <h2 style="font-size: 24px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 16px;">카테고리 관리</h2>
+                    <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                        <input type="text" id="new-category-name" placeholder="카테고리명" style="max-width: 200px;">
+                        <input type="text" id="new-category-icon" placeholder="아이콘 (예: 👕)" style="max-width: 100px;">
+                        <button class="btn btn-primary" onclick="handleAddCategory()">추가</button>
+                    </div>
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>아이콘</th>
+                                <th>카테고리명</th>
+                                <th>ID</th>
+                                <th>관리</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${categories.map(c => `
+                                <tr>
+                                    <td>${c.icon}</td>
+                                    <td>${escapeHtml(c.name)}</td>
+                                    <td>${c.id}</td>
+                                    <td>
+                                        <button class="btn btn-small btn-danger" onclick="handleDeleteCategory('${c.id}')">삭제</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            }
+
+            // ============================================================
+            //  SECTION 23: ADMIN FUNCTIONS
+            // ============================================================
+
+            function handleDeleteProduct(productId) {
+                if (confirm('정말 삭제하시겠습니까?')) {
+                    ProductService.deleteProduct(productId);
+                    showToast('상품이 삭제되었습니다.', 'info');
+                    navigate('/admin/products');
+                }
+            }
+
+            function handleToggleProduct(productId) {
+                const product = ProductService.toggleProductActive(productId);
+                showToast(product.is_active ? '공개 처리되었습니다.' : '비공개 처리되었습니다.', 'info');
+                navigate('/admin/products');
+            }
+
+            function handleUpdateOrderStatus(orderId, status) {
+                OrderService.updateOrderStatus(orderId, status);
+                showToast('주문 상태가 변경되었습니다.', 'success');
+            }
+
+            function showOrderDetail(orderId) {
+                const orders = getOrders();
+                const order = orders.find(o => o.id === orderId);
+                if (!order) return;
+
+                showModal('주문 상세', `
+                    <p style="font-size: 13px; color: var(--gray-400); margin-bottom: 12px;">주문번호: ${order.id}</p>
+                    <p style="font-size: 13px; margin-bottom: 4px;">고객: ${escapeHtml(order.user_name)}</p>
+                    <p style="font-size: 13px; margin-bottom: 4px;">주문일: ${formatDate(order.created_at)}</p>
+                    <p style="font-size: 13px; margin-bottom: 12px;">상태: ${order.status}</p>
+                    <hr style="border: none; border-top: 1px solid var(--gray-100); margin: 12px 0;">
+                    ${order.items.map(item => `
+                        <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px;">
+                            <span>${escapeHtml(item.product_name)} (${item.size}/${item.color}) x${item.quantity}</span>
+                            <span>${formatPrice(item.price * item.quantity)}</span>
+                        </div>
+                    `).join('')}
+                    <hr style="border: none; border-top: 1px solid var(--gray-100); margin: 12px 0;">
+                    <div style="display: flex; justify-content: space-between; font-weight: 700;">
+                        <span>총 금액</span>
+                        <span>${formatPrice(order.total_price)}</span>
+                    </div>
+                `, [
+                    { text: '닫기', className: 'btn-secondary' }
+                ]);
+            }
+
+            function handleDeleteUser(userId) {
+                if (confirm('정말 삭제하시겠습니까?')) {
+                    const users = getUsers();
+                    const filtered = users.filter(u => u.id !== userId);
+                    saveUsers(filtered);
+                    showToast('회원이 삭제되었습니다.', 'info');
+                    navigate('/admin/users');
+                }
+            }
+
+            function handleAddCategory() {
+                const name = document.getElementById('new-category-name').value.trim();
+                const icon = document.getElementById('new-category-icon').value.trim() || '📦';
+                if (!name) {
+                    showToast('카테고리명을 입력해주세요.', 'error');
+                    return;
+                }
+                const categories = getCategories();
+                const newCategory = {
+                    id: name.toLowerCase().replace(/[^a-z0-9]/g, '_'),
+                    name,
+                    icon
+                };
+                categories.push(newCategory);
+                saveCategories(categories);
+                showToast('카테고리가 추가되었습니다.', 'success');
+                navigate('/admin/categories');
+            }
+
+            function handleDeleteCategory(categoryId) {
+                if (confirm('정말 삭제하시겠습니까?')) {
+                    const categories = getCategories();
+                    const filtered = categories.filter(c => c.id !== categoryId);
+                    saveCategories(filtered);
+                    showToast('카테고리가 삭제되었습니다.', 'info');
+                    navigate('/admin/categories');
+                }
+            }
+
+            // ============================================================
+            //  SECTION 24: IMAGE UPLOAD FUNCTIONS
+            // ============================================================
+
+            function handleImageUpload(event) {
+                const files = event.target.files;
+                if (!files || files.length === 0) return;
+
+                const dropzone = document.getElementById('image-dropzone');
+                const grid = document.getElementById('image-upload-grid');
+                dropzone.innerHTML = showLoadingSpinner() + ' 업로드 중...';
+
+                const uploadedImages = window._uploadedImages || [];
+                let processedCount = 0;
+
+                Array.from(files).forEach((file) => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const imageData = e.target.result;
+                        // Ensure proper MIME type prefix
+                        let imageUrl = imageData;
+                        if (!imageUrl.startsWith('data:image/')) {
+                            const mimeType = file.type || 'image/png';
+                            imageUrl = 'data:' + mimeType + ';base64,' + imageData.split(',')[1];
+                        }
+                        uploadedImages.push({
+                            url: imageUrl,
+                            sort_order: uploadedImages.length,
+                            is_thumbnail: uploadedImages.length === 0
+                        });
+                        window._uploadedImages = uploadedImages;
+
+                        processedCount++;
+                        if (processedCount === files.length) {
+                            dropzone.textContent = '클릭하여 이미지를 업로드하세요 (여러 장 가능)';
+                            updateUploadedImagesGrid(grid, uploadedImages);
+                            showToast('이미지 업로드가 완료되었습니다.', 'success');
+                        }
+                    };
+                    reader.onerror = function() {
+                        processedCount++;
+                        if (processedCount === files.length) {
+                            dropzone.textContent = '클릭하여 이미지를 업로드하세요 (여러 장 가능)';
+                            showToast('일부 이미지 업로드에 실패했습니다.', 'error');
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            function updateUploadedImagesGrid(grid, images) {
+                if (!grid) return;
+                grid.innerHTML = images.map((img, i) => `
+                    <div class="image-upload-item ${img.is_thumbnail ? 'is-thumbnail' : ''}" data-index="${i}" draggable="true"
+                         ondragstart="handleDragStart(event, ${i})" ondragover="handleDragOver(event)" ondrop="handleDrop(event, ${i})">
+                        <img src="${img.url}" alt="상품 이미지 ${i + 1}" onerror="this.onerror=null; this.src='${generatePlaceholderImage('상품', '#E8E8ED', '#86868B')}';">
+                        ${img.is_thumbnail ? '<div class="thumb-badge">대표</div>' : ''}
+                        <div class="delete-btn" onclick="removeUploadedImage(${i})">✕</div>
+                    </div>
+                `).join('');
+            }
+
+            function removeUploadedImage(index) {
+                const images = window._uploadedImages || [];
+                images.splice(index, 1);
+                if (images.length > 0) {
+                    images[0].is_thumbnail = true;
+                }
+                window._uploadedImages = images;
+                const grid = document.getElementById('image-upload-grid');
+                if (grid) updateUploadedImagesGrid(grid, images);
+            }
+
+            let draggedImageIndex = null;
+
+            function handleDragStart(event, index) {
+                draggedImageIndex = index;
+                event.dataTransfer.effectAllowed = 'move';
+            }
+
+            function handleDragOver(event) {
+                event.preventDefault();
+                event.dataTransfer.dropEffect = 'move';
+            }
+
+            function handleDrop(event, targetIndex) {
+                event.preventDefault();
+                if (draggedImageIndex === null || draggedImageIndex === targetIndex) return;
+
+                const images = window._uploadedImages || [];
+                const draggedItem = images[draggedImageIndex];
+                images.splice(draggedImageIndex, 1);
+                images.splice(targetIndex, 0, draggedItem);
+                images.forEach((img, i) => {
+                    img.sort_order = i;
+                    img.is_thumbnail = i === 0;
+                });
+                window._uploadedImages = images;
+                draggedImageIndex = null;
+
+                const grid = document.getElementById('image-upload-grid');
+                if (grid) updateUploadedImagesGrid(grid, images);
+            }
+
+            // ============================================================
+            //  SECTION 25: INITIALIZATION
+            // ============================================================
+
+            function init() {
+                seedData();
+                handleRoute();
+
+                window.addEventListener('hashchange', handleRoute);
+
+                // Expose functions globally
+                window.navigate = navigate;
+                window.handleLogout = handleLogout;
+                window.changeGalleryImage = changeGalleryImage;
+                window.selectSize = selectSize;
+                window.selectColor = selectColor;
+                window.changeQuantity = changeQuantity;
+                window.handleAddToCart = handleAddToCart;
+                window.handleBuyNow = handleBuyNow;
+                window.handleToggleWishlist = handleToggleWishlist;
+                window.switchDetailTab = switchDetailTab;
+                window.updateCartQty = updateCartQty;
+                window.removeCartItem = removeCartItem;
+                window.handleCheckout = handleCheckout;
+                window.goToHeroSlide = goToHeroSlide;
+                window.handleCategoryFilterChange = handleCategoryFilterChange;
+                window.handleSortFilterChange = handleSortFilterChange;
+                window.handleSendEmailCode = handleSendEmailCode;
+                window.handleVerifyEmailCode = handleVerifyEmailCode;
+                window.handleSendPhoneCode = handleSendPhoneCode;
+                window.handleVerifyPhoneCode = handleVerifyPhoneCode;
+                window.handleAgreeAll = handleAgreeAll;
+                window.handleSignupSubmit = handleSignupSubmit;
+                window.handleDeleteProduct = handleDeleteProduct;
+                window.handleToggleProduct = handleToggleProduct;
+                window.handleUpdateOrderStatus = handleUpdateOrderStatus;
+                window.showOrderDetail = showOrderDetail;
+                window.handleDeleteUser = handleDeleteUser;
+                window.handleAddCategory = handleAddCategory;
+                window.handleDeleteCategory = handleDeleteCategory;
+                window.handleImageUpload = handleImageUpload;
+                window.removeUploadedImage = removeUploadedImage;
+                window.handleDragStart = handleDragStart;
+                window.handleDragOver = handleDragOver;
+                window.handleDrop = handleDrop;
+                window.showEditProfileModal = showEditProfileModal;
+                window.showChangePasswordModal = showChangePasswordModal;
+            }
+
+            // Start the application
+            init();
+        })();
+    </script>
+</body>
+</html>
