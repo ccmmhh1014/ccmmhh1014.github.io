@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NOVAULT — BEYOND ORDINARY.</title>
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --white: #FFFFFF;
@@ -152,6 +154,7 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            flex-wrap: wrap;
         }
 
         .logo span {
@@ -163,7 +166,7 @@
             font-weight: 500;
             letter-spacing: 1.5px;
             color: var(--gray-400);
-            margin-left: 12px;
+            margin-left: 6px;
             text-transform: uppercase;
         }
 
@@ -1547,6 +1550,14 @@
                 padding: 20px;
                 margin: 12px;
             }
+
+            .logo {
+                font-size: 20px;
+            }
+
+            .logo-slogan {
+                font-size: 9px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -1605,6 +1616,7 @@
         //  © 2026 NOVAULT. All rights reserved.
         //  Design: Apple-style / Benchmarking: Musinsa
         //  Brand: NOVAULT — "BEYOND ORDINARY."
+        //  Supabase integrated (fallback to localStorage)
         // ============================================================
 
         (function() {
@@ -1621,6 +1633,11 @@
             const DEFAULT_ADMIN_NAME = '관리자';
             const VERIFICATION_TIMEOUT_SECONDS = 180; // 3 minutes
             const VERIFICATION_MAX_ATTEMPTS = 5;
+
+            // Supabase configuration
+            const SUPABASE_URL = 'https://ygsrqxsuasstvfywvfbb.supabase.co';
+            const SUPABASE_PUBLISHABLE_KEY =
+            'sb_publishable_XOZb_Xaj3PIhJVAa7RDaAg_IlE7jhOd';
 
             // ⚠️ SECURITY WARNING: The default admin account below is for DEVELOPMENT ONLY.
             // ⚠️ MUST CHANGE PASSWORD or DELETE this account before deploying to production!
@@ -1639,6 +1656,23 @@
             const COLOR_OPTIONS = ['Black', 'White', 'Navy', 'Gray', 'Beige', 'Brown', 'Red', 'Blue', 'Green', 'Pink'];
 
             const ORDER_STATUSES = ['결제완료', '상품준비중', '배송중', '배송완료'];
+
+            // ============================================================
+            //  SECTION 1.5: SUPABASE CLIENT (optional)
+            // ============================================================
+
+            let supabase = null;
+            if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
+                try {
+                    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+                    console.log('Supabase client initialized.');
+                } catch (e) {
+                    console.warn('Supabase initialization failed:', e);
+                    supabase = null;
+                }
+            } else {
+                console.warn('Supabase SDK not loaded. Falling back to localStorage only.');
+            }
 
             // ============================================================
             //  SECTION 2: UTILITY FUNCTIONS
@@ -1722,12 +1756,38 @@
 
             function isAdminUser() {
                 const user = getCurrentUser();
-                return user && user.isAdmin === true;
+                return user && user.is_admin === true;
             }
 
             // ============================================================
-            //  SECTION 3: DATA LAYER (localStorage)
+            //  SECTION 3: DATA LAYER (localStorage + Supabase sync)
             // ============================================================
+
+            // Helper to sync to Supabase (fire and forget)
+            function syncToSupabase(table, data) {
+                if (!supabase) return;
+                try {
+                    // Use upsert to avoid duplicates
+                    supabase.from(table).upsert(data).then(({ error }) => {
+                        if (error) console.warn(`Supabase sync error (${table}):`, error.message);
+                    });
+                } catch (e) {
+                    console.warn(`Supabase sync exception (${table}):`, e);
+                }
+            }
+
+            // Helper to fetch from Supabase (async)
+            async function fetchFromSupabase(table) {
+                if (!supabase) return null;
+                try {
+                    const { data, error } = await supabase.from(table).select('*');
+                    if (error) throw error;
+                    return data;
+                } catch (e) {
+                    console.warn(`Supabase fetch error (${table}):`, e.message);
+                    return null;
+                }
+            }
 
             function getUsers() {
                 const data = localStorage.getItem('novault_users');
@@ -1736,6 +1796,10 @@
 
             function saveUsers(users) {
                 localStorage.setItem('novault_users', JSON.stringify(users));
+                if (supabase) {
+                    // Sync each user to Supabase
+                    users.forEach(u => syncToSupabase('users', u));
+                }
             }
 
             function getProducts() {
@@ -1745,6 +1809,9 @@
 
             function saveProducts(products) {
                 localStorage.setItem('novault_products', JSON.stringify(products));
+                if (supabase) {
+                    products.forEach(p => syncToSupabase('products', p));
+                }
             }
 
             function getVerificationCodes() {
@@ -1754,6 +1821,9 @@
 
             function saveVerificationCodes(codes) {
                 localStorage.setItem('novault_verification_codes', JSON.stringify(codes));
+                if (supabase) {
+                    codes.forEach(c => syncToSupabase('verification_codes', c));
+                }
             }
 
             function getOrders() {
@@ -1763,6 +1833,9 @@
 
             function saveOrders(orders) {
                 localStorage.setItem('novault_orders', JSON.stringify(orders));
+                if (supabase) {
+                    orders.forEach(o => syncToSupabase('orders', o));
+                }
             }
 
             function getCart() {
@@ -1772,6 +1845,9 @@
 
             function saveCart(cart) {
                 localStorage.setItem('novault_cart', JSON.stringify(cart));
+                if (supabase) {
+                    cart.forEach(item => syncToSupabase('cart', item));
+                }
             }
 
             function getWishlist() {
@@ -1781,6 +1857,9 @@
 
             function saveWishlist(wishlist) {
                 localStorage.setItem('novault_wishlist', JSON.stringify(wishlist));
+                if (supabase) {
+                    wishlist.forEach(item => syncToSupabase('wishlist', item));
+                }
             }
 
             function getCategories() {
@@ -1790,6 +1869,9 @@
 
             function saveCategories(categories) {
                 localStorage.setItem('novault_categories', JSON.stringify(categories));
+                if (supabase) {
+                    categories.forEach(c => syncToSupabase('categories', c));
+                }
             }
 
             function getAdminPasswordChanged() {
@@ -1801,7 +1883,7 @@
             }
 
             // ============================================================
-            //  SECTION 4: SEED DATA
+            //  SECTION 4: SEED DATA & SUPABASE SYNC
             // ============================================================
 
             function generatePlaceholderImage(text, bgColor, textColor) {
@@ -1981,6 +2063,33 @@
                         saveWishlist([{ user_id: demoUser.id, product_id: getProducts()[3].id }]);
                     }
                 }
+            }
+
+            // Attempt to load data from Supabase on init (optional)
+            async function syncFromSupabase() {
+                if (!supabase) return;
+
+                const tables = ['users', 'products', 'orders', 'cart', 'wishlist', 'verification_codes', 'categories'];
+                const keys = {
+                    users: 'novault_users',
+                    products: 'novault_products',
+                    orders: 'novault_orders',
+                    cart: 'novault_cart',
+                    wishlist: 'novault_wishlist',
+                    verification_codes: 'novault_verification_codes',
+                    categories: 'novault_categories'
+                };
+
+                for (const table of tables) {
+                    const data = await fetchFromSupabase(table);
+                    if (data && data.length > 0) {
+                        localStorage.setItem(keys[table], JSON.stringify(data));
+                        console.log(`Loaded ${data.length} records from Supabase table "${table}".`);
+                    }
+                }
+
+                // After sync, refresh current UI if needed
+                handleRoute();
             }
 
             // ============================================================
@@ -3004,10 +3113,6 @@
                 const colors = [...new Set(options.map(o => o.color))];
                 const isInWishlist = WishlistService.isInWishlist(product.id);
 
-                let selectedSize = null;
-                let selectedColor = null;
-                let quantity = 1;
-
                 container.innerHTML = `
                     <section style="padding-top: 32px;">
                         <div class="container">
@@ -3107,20 +3212,9 @@
                             </div>
                         </div>
                     </section>
-
-                    <script>
-                        window._productDetailState = {
-                            selectedSize: null,
-                            selectedColor: null,
-                            quantity: 1,
-                            productId: '${product.id}',
-                            images: ${JSON.stringify(images.map(img => ({ url: img.url, is_thumbnail: img.is_thumbnail })))}
-                        };
-                        window._productOptions = ${JSON.stringify(options)};
-                    </script>
                 `;
 
-                // Store state globally for the detail page
+                // Set state for product detail
                 window._productDetailState = {
                     selectedSize: null,
                     selectedColor: null,
@@ -4402,6 +4496,11 @@
                 const images = product ? safeArray(product.images) : [];
                 const options = product ? safeArray(product.options) : [];
 
+                // Set state variables needed for upload and submit
+                window._uploadedImages = images.slice(); // copy
+                window._isEditing = !!product;
+                window._editingProductId = product ? product.id : null;
+
                 return `
                     <h2 style="font-size: 24px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 24px;">
                         ${product ? '상품 수정' : '새 상품 등록'}
@@ -4466,7 +4565,8 @@
                             <input type="file" id="file-input" accept="image/*" multiple style="display: none;" onchange="handleImageUpload(event)">
                             <div class="image-upload-grid" id="image-upload-grid">
                                 ${images.map((img, i) => `
-                                    <div class="image-upload-item ${img.is_thumbnail ? 'is-thumbnail' : ''}" data-index="${i}" draggable="true">
+                                    <div class="image-upload-item ${img.is_thumbnail ? 'is-thumbnail' : ''}" data-index="${i}" draggable="true"
+                                         ondragstart="handleDragStart(event, ${i})" ondragover="handleDragOver(event)" ondrop="handleDrop(event, ${i})">
                                         <img src="${img.url}" alt="상품 이미지 ${i + 1}" onerror="this.onerror=null; this.src='${generatePlaceholderImage('상품', '#E8E8ED', '#86868B')}';">
                                         ${img.is_thumbnail ? '<div class="thumb-badge">대표</div>' : ''}
                                         <div class="delete-btn" onclick="removeUploadedImage(${i})">✕</div>
@@ -4480,12 +4580,6 @@
                             <button type="submit" class="btn btn-primary">${product ? '수정하기' : '등록하기'}</button>
                         </div>
                     </form>
-
-                    <script>
-                        window._uploadedImages = ${JSON.stringify(images)};
-                        window._isEditing = ${product ? 'true' : 'false'};
-                        window._editingProductId = ${product ? "'" + product.id + "'" : 'null'};
-                    </script>
                 `;
             }
 
@@ -4705,7 +4799,6 @@
                     const reader = new FileReader();
                     reader.onload = function(e) {
                         const imageData = e.target.result;
-                        // Ensure proper MIME type prefix
                         let imageUrl = imageData;
                         if (!imageUrl.startsWith('data:image/')) {
                             const mimeType = file.type || 'image/png';
@@ -4791,12 +4884,85 @@
             }
 
             // ============================================================
-            //  SECTION 25: INITIALIZATION
+            //  SECTION 25: ADMIN PRODUCT FORM SUBMIT HANDLER
+            // ============================================================
+
+            function handleAdminProductFormSubmit(e) {
+                e.preventDefault();
+                const name = document.getElementById('product-name').value.trim();
+                const brand = document.getElementById('product-brand').value.trim() || 'NOVAULT';
+                const category = document.getElementById('product-category').value;
+                const price = Number(document.getElementById('product-price').value);
+                const discount = Number(document.getElementById('product-discount').value) || 0;
+                const stock = Number(document.getElementById('product-stock').value) || 0;
+                const sizes = document.getElementById('product-sizes').value.split(',').map(s => s.trim()).filter(Boolean);
+                const colors = document.getElementById('product-colors').value.split(',').map(c => c.trim()).filter(Boolean);
+                const description = document.getElementById('product-description').value;
+                const isActive = document.getElementById('product-active').value === 'true';
+                const images = window._uploadedImages || [];
+
+                if (!name) {
+                    showToast('상품명을 입력해주세요.', 'error');
+                    return;
+                }
+                if (sizes.length === 0 || colors.length === 0) {
+                    showToast('사이즈와 색상을 최소 하나씩 입력해주세요.', 'error');
+                    return;
+                }
+
+                // Build options array: each combination gets equal stock share for simplicity
+                const options = [];
+                const perOptionStock = Math.floor(stock / (sizes.length * colors.length));
+                sizes.forEach(size => {
+                    colors.forEach(color => {
+                        options.push({ size, color, stock: perOptionStock });
+                    });
+                });
+
+                const productData = {
+                    name,
+                    brand,
+                    category,
+                    price,
+                    discount_rate: discount,
+                    description,
+                    is_active: isActive,
+                    images,
+                    options
+                };
+
+                if (window._isEditing && window._editingProductId) {
+                    ProductService.updateProduct(window._editingProductId, productData);
+                    showToast('상품이 수정되었습니다.', 'success');
+                } else {
+                    ProductService.createProduct(productData);
+                    showToast('상품이 등록되었습니다.', 'success');
+                }
+
+                navigate('/admin/products');
+            }
+
+            // Attach admin form submit listener when admin product form is rendered
+            document.addEventListener('submit', (e) => {
+                if (e.target && e.target.id === 'admin-product-form') {
+                    handleAdminProductFormSubmit(e);
+                }
+            });
+
+            // ============================================================
+            //  SECTION 26: INITIALIZATION
             // ============================================================
 
             function init() {
                 seedData();
                 handleRoute();
+
+                // Attempt to sync data from Supabase (async)
+                if (supabase) {
+                    syncFromSupabase().catch(err => {
+                        console.warn('Supabase sync skipped due to error:', err);
+                    });
+                }
 
                 window.addEventListener('hashchange', handleRoute);
 
@@ -4837,6 +5003,7 @@
                 window.handleDrop = handleDrop;
                 window.showEditProfileModal = showEditProfileModal;
                 window.showChangePasswordModal = showChangePasswordModal;
+                window.handleAdminProductFormSubmit = handleAdminProductFormSubmit;
             }
 
             // Start the application
