@@ -6,8 +6,7 @@
     <title>NOVAULT — BEYOND ORDINARY.</title>
     <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://js.tosspayments.com/v2/standard"></script>
-    <!-- Production config: define window.NOVAULT_CONFIG before this file (e.g. config.js). -->
+    <!-- Production config: define window.NOVAULT_CONFIG before this application script (e.g. config.js). -->
     <script>window.NOVAULT_CONFIG = window.NOVAULT_CONFIG || {};</script>
     <style>
         :root {
@@ -1589,6 +1588,11 @@
                 padding: 0 16px;
             }
         }
+
+        @media (max-width: 800px) {
+            #checkout-form > div { grid-template-columns: 1fr !important; }
+            #checkout-form aside { position: static !important; }
+        }
     </style>
 </head>
 <body>
@@ -1636,11 +1640,8 @@
             const VERIFICATION_MAX_ATTEMPTS = 5;
 
             // Supabase configuration
-            const SUPABASE_URL = window.NOVAULT_CONFIG.supabaseUrl || 'https://ygsrqxsuasstvfywvfbb.supabase.co';
-            const SUPABASE_PUBLISHABLE_KEY = window.NOVAULT_CONFIG.supabasePublishableKey || 'sb_publishable_XOZb_Xaj3PIhJVAa7RDaAg_IlE7jhOd';
-            const TOSS_CLIENT_KEY = window.NOVAULT_CONFIG.tossClientKey || '';
-            const TOSS_WIDGET_VARIANT_KEY = window.NOVAULT_CONFIG.tossWidgetVariantKey || 'DEFAULT';
-            const PAYMENT_FUNCTION_URL = window.NOVAULT_CONFIG.paymentFunctionUrl || '';
+            const SUPABASE_URL = window.NOVAULT_CONFIG.supabaseUrl || '';
+            const SUPABASE_PUBLISHABLE_KEY = window.NOVAULT_CONFIG.supabasePublishableKey || '';
 
             // ⚠️ SECURITY WARNING: The default admin account below is for DEVELOPMENT ONLY.
             // ⚠️ MUST CHANGE PASSWORD or DELETE this account before deploying to production!
@@ -1658,7 +1659,7 @@
             const SIZE_OPTIONS = ['S', 'M', 'L', 'XL', 'FREE'];
             const COLOR_OPTIONS = ['Black', 'White', 'Navy', 'Gray', 'Beige', 'Brown', 'Red', 'Blue', 'Green', 'Pink'];
 
-            const ORDER_STATUSES = ['결제완료', '상품준비중', '배송중', '배송완료'];
+            const ORDER_STATUSES = ['주문접수', '상품준비중', '배송중', '배송완료', '취소', '환불'];
 
             // ============================================================
             //  SECTION 1.5: SUPABASE CLIENT (optional)
@@ -2402,65 +2403,69 @@
             //  SECTION 8: ORDER SERVICE
             // ============================================================
 
-            const PaymentService = {
-                async requestPayment(order) {
-                    if (!TOSS_CLIENT_KEY || typeof window.TossPayments !== 'function') {
-                        return { success: false, message: '토스페이먼츠 설정이 없습니다. config.js의 tossClientKey를 설정해주세요.' };
-                    }
-                    if (!supabase || !PAYMENT_FUNCTION_URL) {
-                        return { success: false, message: '결제 승인용 Supabase Edge Function이 설정되지 않았습니다.' };
-                    }
-                    const tossPayments = TossPayments(TOSS_CLIENT_KEY);
-                    const customerKey = crypto.randomUUID();
-                    const widgets = tossPayments.widgets({ customerKey });
-                    await widgets.setAmount({ currency: 'KRW', value: order.total_price });
-
-                    showModal('결제 수단 선택', `
-                        <div id="novault-payment-method" style="min-height:220px;"></div>
-                        <div id="novault-payment-agreement" style="margin-top:12px;"></div>
-                    `, [
-                        { text: '취소', className: 'btn-secondary' },
-                        { text: '결제하기', className: 'btn-primary', onClick: async () => {
-                            try {
-                                await widgets.requestPayment({
-                                    orderId: order.id.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64),
-                                    orderName: order.items.length > 1 ? `${order.items[0].product_name} 외 ${order.items.length - 1}건` : order.items[0].product_name,
-                                    customerEmail: getCurrentUser()?.email,
-                                    customerName: getCurrentUser()?.name,
-                                    customerMobilePhone: (getCurrentUser()?.phone || '').replace(/[^0-9]/g, ''),
-                                    successUrl: `${window.location.origin}${window.location.pathname}#/payment/success`,
-                                    failUrl: `${window.location.origin}${window.location.pathname}#/payment/fail`,
-                                    windowTarget: window.innerWidth < 768 ? 'self' : 'iframe'
-                                });
-                            } catch (e) { showToast(e?.message || '결제를 시작할 수 없습니다.', 'error'); }
-                        }}
-                    ]);
-                    await widgets.renderPaymentMethods({ selector: '#novault-payment-method', variantKey: TOSS_WIDGET_VARIANT_KEY });
-                    await widgets.renderAgreement({ selector: '#novault-payment-agreement', variantKey: TOSS_WIDGET_VARIANT_KEY });
-                    return { success: true };
-                }
-            };
-
             const OrderService = {
-                async createPendingOrder(cartItems) {
+                async createOrder(cartItems, shipping) {
                     const user = getCurrentUser();
                     if (!user) return { success: false, message: '로그인이 필요합니다.' };
                     if (!cartItems.length) return { success: false, message: '주문할 상품이 없습니다.' };
+                    if (!shipping.name || !shipping.phone || !shipping.address) {
+                        return { success: false, message: '배송 정보를 모두 입력해주세요.' };
+                    }
+
                     const orderItems = cartItems.map(item => {
                         const product = ProductService.getProductById(item.product_id);
-                        return { product_id: item.product_id, product_name: product ? product.name : '삭제된 상품', size: item.size, color: item.color, quantity: item.quantity, price: product ? ProductService.getDiscountedPrice(product) : 0 };
+                        const price = product ? ProductService.getDiscountedPrice(product) : 0;
+                        return {
+                            product_id: item.product_id,
+                            product_name: product ? product.name : '삭제된 상품',
+                            size: item.size,
+                            color: item.color,
+                            quantity: item.quantity,
+                            price
+                        };
                     });
-                    const totalPrice = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-                    const order = { id: generateId('order'), user_id: user.id, user_name: user.name, status: '결제대기', total_price: totalPrice, items: orderItems, created_at: new Date().toISOString() };
-                    const orders = getOrders(); orders.push(order); saveOrders(orders);
-                    if (supabase) {
-                        const { error } = await supabase.from('orders').insert({ id: order.id, user_id: order.user_id, user_name: order.user_name, status: order.status, total_price: order.total_price, items: order.items, created_at: order.created_at });
-                        if (error) { console.warn('Order DB insert failed:', error.message); return { success: false, message: '주문 정보를 저장하지 못했습니다.' }; }
-                    }
-                    return { success: true, message: '주문서가 생성되었습니다.', order };
-                },
 
-                createOrder(cartItems) { return this.createPendingOrder(cartItems); },
+                    if (orderItems.some(item => item.price <= 0)) {
+                        return { success: false, message: '상품 정보를 확인할 수 없습니다. 장바구니를 새로고침해주세요.' };
+                    }
+
+                    const productTotal = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+                    const shippingFee = productTotal >= 50000 ? 0 : 3000;
+                    const totalPrice = productTotal + shippingFee;
+                    const order = {
+                        id: generateId('order'),
+                        user_id: user.id,
+                        user_name: user.name,
+                        status: '주문접수',
+                        total_price: totalPrice,
+                        items: orderItems,
+                        shipping_name: shipping.name,
+                        shipping_phone: shipping.phone,
+                        shipping_address: shipping.address,
+                        shipping_message: shipping.message || '',
+                        created_at: new Date().toISOString()
+                    };
+
+                    if (supabase) {
+                        const { error } = await supabase.from('orders').insert({
+                            id: order.id, user_id: order.user_id, user_name: order.user_name,
+                            status: order.status, total_price: order.total_price, items: order.items,
+                            shipping_name: order.shipping_name, shipping_phone: order.shipping_phone,
+                            shipping_address: order.shipping_address, shipping_message: order.shipping_message,
+                            created_at: order.created_at
+                        });
+                        if (error) {
+                            console.warn('Order DB insert failed:', error.message);
+                            return { success: false, message: '주문 정보를 저장하지 못했습니다. 잠시 후 다시 시도해주세요.' };
+                        }
+                    }
+
+                    const orders = getOrders();
+                    orders.push(order);
+                    saveOrders(orders);
+                    CartService.clearCart();
+                    return { success: true, message: '주문이 접수되었습니다.', order };
+                },
 
                 getUserOrders() {
                     const user = getCurrentUser();
@@ -2480,6 +2485,7 @@
                     const order = orders.find(o => o.id === orderId);
                     if (!order) return false;
                     order.status = newStatus;
+                    order.updated_at = new Date().toISOString();
                     saveOrders(orders);
                     return true;
                 }
@@ -2630,6 +2636,14 @@
                         break;
                     case '/cart':
                         renderCartPage(mainContent);
+                        footer.innerHTML = renderFooter();
+                        break;
+                    case '/checkout':
+                        renderCheckoutPage(mainContent);
+                        footer.innerHTML = renderFooter();
+                        break;
+                    case '/order-complete':
+                        renderOrderCompletePage(mainContent, queryParams);
                         footer.innerHTML = renderFooter();
                         break;
                     case '/wishlist':
@@ -3392,8 +3406,8 @@
                                     <span>총 결제 금액</span>
                                     <span>${formatPrice(totalPrice >= 50000 ? totalPrice : totalPrice + 3000)}</span>
                                 </div>
-                                <button class="btn btn-primary" style="width: 100%;" onclick="handleCheckout()">
-                                    주문하기
+                                <button class="btn btn-primary" style="width: 100%;" onclick="navigate('/checkout')">
+                                    주문서 작성하기
                                 </button>
                             </div>
                         </div>
@@ -3421,12 +3435,133 @@
                 renderCartPage(document.getElementById('main-content'));
             }
 
-            async function handleCheckout() {
+            function handleCheckout() {
+                navigate('/checkout');
+            }
+
+            function renderCheckoutPage(container) {
+                if (!isLoggedIn()) {
+                    showToast('주문하려면 로그인이 필요합니다.', 'error');
+                    navigate('/login');
+                    return;
+                }
+
                 const cartItems = CartService.getCart();
-                const result = await OrderService.createPendingOrder(cartItems);
-                if (!result.success) { showToast(result.message, 'error'); return; }
-                const payment = await PaymentService.requestPayment(result.order);
-                if (!payment.success) { showToast(payment.message, 'error'); return; }
+                if (!cartItems.length) {
+                    container.innerHTML = `
+                        <section style="padding:80px 0;">
+                            <div class="container">
+                                ${renderEmptyState('🛒', '주문할 상품이 없습니다.')}
+                                <div style="text-align:center;margin-top:24px;">
+                                    <button class="btn btn-primary" onclick="navigate('/category')">상품 둘러보기</button>
+                                </div>
+                            </div>
+                        </section>`;
+                    return;
+                }
+
+                const user = getCurrentUser();
+                const productTotal = CartService.getTotalPrice(cartItems);
+                const shippingFee = productTotal >= 50000 ? 0 : 3000;
+                const totalPrice = productTotal + shippingFee;
+                const itemsHtml = cartItems.map(item => {
+                    const product = ProductService.getProductById(item.product_id);
+                    const price = product ? ProductService.getDiscountedPrice(product) : 0;
+                    const image = product?.images?.find(img => img.is_thumbnail) || product?.images?.[0];
+                    return `
+                        <div style="display:flex;gap:16px;padding:16px 0;border-bottom:1px solid var(--gray-100);">
+                            <img src="${image?.url || generatePlaceholderImage('상품', '#E8E8ED', '#86868B')}" alt="${escapeHtml(product?.name || '상품')}" style="width:72px;height:90px;object-fit:cover;border-radius:10px;">
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-weight:600;">${escapeHtml(product?.name || '상품')}</div>
+                                <div style="font-size:13px;color:var(--gray-400);margin-top:6px;">${escapeHtml(item.size || 'FREE')} / ${escapeHtml(item.color || '-')} · ${item.quantity}개</div>
+                                <div style="font-weight:600;margin-top:8px;">${formatPrice(price * item.quantity)}</div>
+                            </div>
+                        </div>`;
+                }).join('');
+
+                container.innerHTML = `
+                    <section style="padding:40px 0 80px;">
+                        <div class="container" style="max-width:1080px;">
+                            <div style="margin-bottom:36px;">
+                                <div style="font-size:13px;color:var(--gray-400);margin-bottom:8px;">NOVAULT ORDER</div>
+                                <h1 style="font-size:34px;font-weight:700;letter-spacing:-1px;">주문서</h1>
+                                <p style="color:var(--gray-500);margin-top:8px;">배송 정보를 확인한 뒤 주문을 접수해주세요.</p>
+                            </div>
+                            <form id="checkout-form">
+                                <div style="display:grid;grid-template-columns:minmax(0,1.35fr) minmax(320px,.65fr);gap:32px;align-items:start;">
+                                    <div>
+                                        <div style="background:#fff;border:1px solid var(--gray-100);border-radius:18px;padding:24px;margin-bottom:18px;">
+                                            <h2 style="font-size:20px;margin-bottom:20px;">배송 정보</h2>
+                                            <div class="form-group"><label for="shipping-name">받는 분</label><input id="shipping-name" value="${escapeHtml(user.name || '')}" required placeholder="이름"></div>
+                                            <div class="form-group"><label for="shipping-phone">휴대폰 번호</label><input id="shipping-phone" value="${escapeHtml(user.phone || '')}" required inputmode="tel" placeholder="010-0000-0000"></div>
+                                            <div class="form-group"><label for="shipping-address">배송 주소</label><textarea id="shipping-address" rows="3" required placeholder="도로명 주소와 상세 주소를 입력해주세요."></textarea></div>
+                                            <div class="form-group"><label for="shipping-message">배송 메모 <span style="font-weight:400;color:var(--gray-400);">(선택)</span></label><select id="shipping-message"><option value="">배송 메모를 선택해주세요</option><option>문 앞에 놓아주세요.</option><option>경비실에 맡겨주세요.</option><option>배송 전 연락 부탁드립니다.</option><option value="custom">직접 입력</option></select></div>
+                                            <div class="form-group" id="custom-message-wrap" style="display:none;"><label for="shipping-custom-message">직접 입력</label><input id="shipping-custom-message" placeholder="배송 메모를 입력해주세요."></div>
+                                        </div>
+                                        <div style="background:var(--gray-bg);border-radius:18px;padding:20px;font-size:13px;color:var(--gray-500);line-height:1.7;">
+                                            <strong style="color:var(--black);">현재 결제 기능은 준비 중입니다.</strong><br>지금은 별도의 결제 없이 주문 접수만 진행됩니다. 접수된 주문은 관리자 페이지에서 확인하고 배송 상태를 관리할 수 있습니다.
+                                        </div>
+                                    </div>
+                                    <aside style="background:#fff;border:1px solid var(--gray-100);border-radius:18px;padding:24px;position:sticky;top:90px;">
+                                        <h2 style="font-size:20px;margin-bottom:18px;">주문 상품</h2>
+                                        ${itemsHtml}
+                                        <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--gray-100);">
+                                            <div class="cart-summary-row"><span>상품 금액</span><span>${formatPrice(productTotal)}</span></div>
+                                            <div class="cart-summary-row"><span>배송비</span><span>${shippingFee ? formatPrice(shippingFee) : '무료'}</span></div>
+                                            <div class="cart-summary-row total"><span>주문 금액</span><span>${formatPrice(totalPrice)}</span></div>
+                                        </div>
+                                        <label style="display:flex;gap:10px;align-items:flex-start;margin:18px 0;font-size:13px;color:var(--gray-500);cursor:pointer;"><input type="checkbox" id="order-agree" required style="margin-top:3px;">주문 정보를 확인했으며 주문 접수에 동의합니다.</label>
+                                        <button class="btn btn-primary" type="submit" style="width:100%;">${formatPrice(totalPrice)} 주문 접수하기</button>
+                                    </aside>
+                                </div>
+                            </form>
+                        </div>
+                    </section>
+                `;
+
+                const messageSelect = document.getElementById('shipping-message');
+                const customWrap = document.getElementById('custom-message-wrap');
+                messageSelect.addEventListener('change', () => { customWrap.style.display = messageSelect.value === 'custom' ? 'block' : 'none'; });
+
+                document.getElementById('checkout-form').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const shipping = {
+                        name: document.getElementById('shipping-name').value.trim(),
+                        phone: document.getElementById('shipping-phone').value.trim(),
+                        address: document.getElementById('shipping-address').value.trim(),
+                        message: messageSelect.value === 'custom' ? document.getElementById('shipping-custom-message').value.trim() : messageSelect.value
+                    };
+                    const result = await OrderService.createOrder(cartItems, shipping);
+                    if (!result.success) { showToast(result.message, 'error'); return; }
+                    renderHeader();
+                    renderMobileNav();
+                    navigate('/order-complete?id=' + encodeURIComponent(result.order.id));
+                });
+            }
+
+            function renderOrderCompletePage(container, params) {
+                const order = OrderService.getUserOrders().find(o => o.id === params.id);
+                if (!order) { navigate('/mypage'); return; }
+                const productCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
+                container.innerHTML = `
+                    <section style="padding:100px 0;">
+                        <div class="container" style="max-width:640px;text-align:center;">
+                            <div style="font-size:56px;margin-bottom:20px;">✓</div>
+                            <div style="font-size:13px;color:var(--gray-400);letter-spacing:1px;">ORDER RECEIVED</div>
+                            <h1 style="font-size:34px;margin:10px 0 12px;">주문이 접수되었습니다.</h1>
+                            <p style="color:var(--gray-500);line-height:1.7;">결제 기능은 아직 준비 중이며, 현재 주문은 결제 없이 접수됩니다.<br>관리자가 주문을 확인한 후 상품 준비를 시작합니다.</p>
+                            <div style="margin-top:32px;background:var(--gray-bg);border-radius:18px;padding:24px;text-align:left;">
+                                <div class="cart-summary-row"><span>주문번호</span><strong>${escapeHtml(order.id)}</strong></div>
+                                <div class="cart-summary-row"><span>주문 상품</span><span>${productCount}개</span></div>
+                                <div class="cart-summary-row"><span>주문 금액</span><strong>${formatPrice(order.total_price)}</strong></div>
+                                <div class="cart-summary-row"><span>주문 상태</span><span>${escapeHtml(order.status)}</span></div>
+                            </div>
+                            <div style="display:flex;gap:10px;margin-top:24px;">
+                                <button class="btn btn-secondary" style="flex:1;" onclick="navigate('/mypage')">주문 내역 보기</button>
+                                <button class="btn btn-primary" style="flex:1;" onclick="navigate('/category')">쇼핑 계속하기</button>
+                            </div>
+                        </div>
+                    </section>`;
             }
 
             // ============================================================
@@ -4028,27 +4163,6 @@
 
             function renderLoadingPage(container, message) {
                 container.innerHTML = `<section style="padding:120px 24px;text-align:center;"><div class="container"><div style="font-size:20px;font-weight:700;">${escapeHtml(message)}</div><div style="margin-top:12px;color:var(--gray-400);">잠시만 기다려주세요.</div></div></section>`;
-            }
-
-            async function handlePaymentRedirect(success) {
-                const params = new URLSearchParams(window.location.hash.split('?')[1] || '');
-                if (!success) { showToast(params.get('message') || '결제가 취소되었습니다.', 'error'); navigate('/cart'); return; }
-                const orderId = params.get('orderId');
-                const paymentKey = params.get('paymentKey');
-                const amount = Number(params.get('amount'));
-                if (!orderId || !paymentKey || !amount || !PAYMENT_FUNCTION_URL) { showToast('결제 결과가 올바르지 않습니다.', 'error'); navigate('/cart'); return; }
-                try {
-                    const { data: { session } } = await supabase.auth.getSession();
-                    const response = await fetch(PAYMENT_FUNCTION_URL, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json', ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}) },
-                        body: JSON.stringify({ orderId, paymentKey, amount })
-                    });
-                    const result = await response.json();
-                    if (!response.ok || !result.success) throw new Error(result.message || '결제 승인에 실패했습니다.');
-                    CartService.clearCart();
-                    showToast('결제가 완료되었습니다.', 'success');
-                    renderHeader(); renderMobileNav(); navigate('/mypage');
-                } catch (e) { showToast(e.message || '결제 승인에 실패했습니다.', 'error'); }
             }
 
             // ============================================================
@@ -4930,7 +5044,6 @@
                 window.updateCartQty = updateCartQty;
                 window.removeCartItem = removeCartItem;
                 window.handleCheckout = handleCheckout;
-                window.handlePaymentRedirect = handlePaymentRedirect;
                 window.goToHeroSlide = goToHeroSlide;
                 window.handleCategoryFilterChange = handleCategoryFilterChange;
                 window.handleSortFilterChange = handleSortFilterChange;
