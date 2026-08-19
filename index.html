@@ -6,6 +6,9 @@
     <title>NOVAULT — BEYOND ORDINARY.</title>
     <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://js.tosspayments.com/v2/standard"></script>
+    <!-- Production config: define window.NOVAULT_CONFIG before this file (e.g. config.js). -->
+    <script>window.NOVAULT_CONFIG = window.NOVAULT_CONFIG || {};</script>
     <style>
         :root {
             --white: #FFFFFF;
@@ -1628,16 +1631,16 @@
 
             const APP_NAME = 'NOVAULT';
             const APP_SLOGAN = 'BEYOND ORDINARY.';
-            const DEFAULT_ADMIN_EMAIL = 'admin@shopmall.com';
-            const DEFAULT_ADMIN_PASSWORD = 'Admin1234!';
             const DEFAULT_ADMIN_NAME = '관리자';
             const VERIFICATION_TIMEOUT_SECONDS = 180; // 3 minutes
             const VERIFICATION_MAX_ATTEMPTS = 5;
 
             // Supabase configuration
-            const SUPABASE_URL = 'https://ygsrqxsuasstvfywvfbb.supabase.co';
-            const SUPABASE_PUBLISHABLE_KEY =
-            'sb_publishable_XOZb_Xaj3PIhJVAa7RDaAg_IlE7jhOd';
+            const SUPABASE_URL = window.NOVAULT_CONFIG.supabaseUrl || '';
+            const SUPABASE_PUBLISHABLE_KEY = window.NOVAULT_CONFIG.supabasePublishableKey || '';
+            const TOSS_CLIENT_KEY = window.NOVAULT_CONFIG.tossClientKey || '';
+            const TOSS_WIDGET_VARIANT_KEY = window.NOVAULT_CONFIG.tossWidgetVariantKey || 'DEFAULT';
+            const PAYMENT_FUNCTION_URL = window.NOVAULT_CONFIG.paymentFunctionUrl || '';
 
             // ⚠️ SECURITY WARNING: The default admin account below is for DEVELOPMENT ONLY.
             // ⚠️ MUST CHANGE PASSWORD or DELETE this account before deploying to production!
@@ -1662,16 +1665,19 @@
             // ============================================================
 
             let supabase = null;
-            if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
+            const SUPABASE_ENABLED = Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY);
+            if (SUPABASE_ENABLED && typeof window.supabase !== 'undefined' && window.supabase.createClient) {
                 try {
-                    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+                    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+                        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+                    });
                     console.log('Supabase client initialized.');
                 } catch (e) {
                     console.warn('Supabase initialization failed:', e);
                     supabase = null;
                 }
             } else {
-                console.warn('Supabase SDK not loaded. Falling back to localStorage only.');
+                console.warn('Supabase is not configured. Configure window.NOVAULT_CONFIG to enable production mode.');
             }
 
             // ============================================================
@@ -1732,7 +1738,7 @@
             function setSession(userId, isAdmin, remember) {
                 const session = {
                     userId,
-                    isAdmin,
+                    isAdmin: Boolean(isAdmin),
                     createdAt: Date.now(),
                     expiresAt: remember ? Date.now() + (30 * 24 * 60 * 60 * 1000) : Date.now() + (24 * 60 * 60 * 1000)
                 };
@@ -1741,22 +1747,30 @@
 
             function clearSession() {
                 localStorage.removeItem('novault_session');
+                localStorage.removeItem('novault_current_user');
             }
 
             function getCurrentUser() {
+                const cached = localStorage.getItem('novault_current_user');
+                if (cached) {
+                    try { return JSON.parse(cached); } catch {}
+                }
                 const session = getSession();
                 if (!session) return null;
                 const users = getUsers();
                 return users.find(u => u.id === session.userId) || null;
             }
 
-            function isLoggedIn() {
-                return getCurrentUser() !== null;
+            function cacheCurrentUser(user) {
+                if (user) localStorage.setItem('novault_current_user', JSON.stringify(user));
+                else localStorage.removeItem('novault_current_user');
             }
+
+            function isLoggedIn() { return getCurrentUser() !== null; }
 
             function isAdminUser() {
                 const user = getCurrentUser();
-                return user && user.is_admin === true;
+                return Boolean(user && user.is_admin === true);
             }
 
             // ============================================================
@@ -1899,39 +1913,6 @@
             }
 
             function seedData() {
-                // Seed Admin User
-                const existingUsers = getUsers();
-                if (!existingUsers.find(u => u.email === DEFAULT_ADMIN_EMAIL)) {
-                    existingUsers.push({
-                        id: generateId('user'),
-                        email: DEFAULT_ADMIN_EMAIL,
-                        phone: '',
-                        password_hash: btoa(DEFAULT_ADMIN_PASSWORD), // ⚠️ DEV ONLY — use bcrypt in production!
-                        name: DEFAULT_ADMIN_NAME,
-                        email_verified: true,
-                        phone_verified: false,
-                        is_admin: true,
-                        created_at: new Date().toISOString()
-                    });
-                    saveUsers(existingUsers);
-                }
-
-                // Seed Demo User
-                if (!existingUsers.find(u => u.email === 'user@demo.com')) {
-                    existingUsers.push({
-                        id: generateId('user'),
-                        email: 'user@demo.com',
-                        phone: '01012345678',
-                        password_hash: btoa('User1234!'),
-                        name: '데모유저',
-                        email_verified: true,
-                        phone_verified: true,
-                        is_admin: false,
-                        created_at: new Date().toISOString()
-                    });
-                    saveUsers(existingUsers);
-                }
-
                 // Seed Products
                 const existingProducts = getProducts();
                 if (existingProducts.length === 0) {
@@ -2097,173 +2078,131 @@
             // ============================================================
 
             const AuthService = {
-                register(userData) {
-                    const users = getUsers();
+                async register(userData) {
+                    if (!supabase) return { success: false, message: 'Supabase가 설정되지 않았습니다. config.js를 확인해주세요.' };
+                    if (!userData.email || !userData.password) return { success: false, message: '이메일과 비밀번호를 입력해주세요.' };
 
-                    if (users.find(u => u.email === userData.email)) {
-                        return { success: false, message: '이미 등록된 이메일입니다.' };
-                    }
-
-                    if (!userData.email_verified) {
-                        return { success: false, message: '이메일 인증을 완료해주세요.' };
-                    }
-
-                    const newUser = {
-                        id: generateId('user'),
+                    const { data, error } = await supabase.auth.signUp({
                         email: userData.email,
-                        phone: userData.phone || '',
-                        password_hash: btoa(userData.password), // ⚠️ DEV ONLY — use bcrypt in production!
-                        name: userData.name,
-                        email_verified: userData.email_verified,
-                        phone_verified: userData.phone_verified || false,
-                        is_admin: false,
-                        created_at: new Date().toISOString()
-                    };
+                        password: userData.password,
+                        options: {
+                            emailRedirectTo: window.location.origin + window.location.pathname,
+                            data: { name: userData.name, phone: userData.phone || '' }
+                        }
+                    });
+                    if (error) return { success: false, message: error.message };
 
-                    users.push(newUser);
-                    saveUsers(users);
-
-                    // Clean up verification codes
-                    const codes = getVerificationCodes();
-                    const filtered = codes.filter(c => c.target !== userData.email);
-                    saveVerificationCodes(filtered);
-
-                    return { success: true, message: '회원가입이 완료되었습니다.', user: newUser };
+                    if (data.user) {
+                        const profile = {
+                            id: data.user.id,
+                            email: data.user.email,
+                            phone: userData.phone || '',
+                            name: userData.name || '',
+                            email_verified: Boolean(data.user.email_confirmed_at),
+                            phone_verified: Boolean(userData.phone_verified),
+                            is_admin: false,
+                            created_at: data.user.created_at
+                        };
+                        const { error: profileError } = await supabase.from('profiles').upsert(profile);
+                        if (profileError) console.warn('Profile creation failed:', profileError.message);
+                        cacheCurrentUser(profile);
+                    }
+                    return { success: true, message: data.session ? '회원가입이 완료되었습니다.' : '회원가입이 완료되었습니다. 이메일 인증 후 로그인해주세요.', user: data.user };
                 },
 
-                login(email, password, remember) {
-                    const users = getUsers();
-                    const user = users.find(u => u.email === email);
-
-                    if (!user) {
-                        return { success: false, message: '존재하지 않는 이메일입니다.' };
-                    }
-
-                    if (user.password_hash !== btoa(password)) {
-                        return { success: false, message: '비밀번호가 올바르지 않습니다.' };
-                    }
-
-                    setSession(user.id, user.is_admin, remember);
-                    return { success: true, message: '로그인 되었습니다.', user };
+                async login(email, password, remember) {
+                    if (!supabase) return { success: false, message: 'Supabase가 설정되지 않았습니다. config.js를 확인해주세요.' };
+                    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                    if (error) return { success: false, message: error.message };
+                    const authUser = data.user;
+                    let profile = null;
+                    const { data: profileData, error: profileError } = await supabase.from('profiles').select('*').eq('id', authUser.id).maybeSingle();
+                    if (!profileError) profile = profileData;
+                    profile = profile || { id: authUser.id, email: authUser.email, name: authUser.user_metadata?.name || '', phone: authUser.user_metadata?.phone || '', is_admin: false, email_verified: Boolean(authUser.email_confirmed_at), created_at: authUser.created_at };
+                    cacheCurrentUser(profile);
+                    setSession(profile.id, profile.is_admin, remember);
+                    return { success: true, message: '로그인 되었습니다.', user: profile };
                 },
 
-                logout() {
+                async logout() {
+                    if (supabase) await supabase.auth.signOut();
                     clearSession();
                     return { success: true, message: '로그아웃 되었습니다.' };
                 },
 
+                async resetPassword(email, newPassword) {
+                    if (!supabase) return { success: false, message: 'Supabase가 설정되지 않았습니다.' };
+                    const { error } = await supabase.auth.updateUser({ password: newPassword });
+                    if (error) return { success: false, message: error.message };
+                    return { success: true, message: '비밀번호가 변경되었습니다.' };
+                },
+
+                async changePassword(userId, newPassword) {
+                    if (!supabase) return { success: false, message: 'Supabase가 설정되지 않았습니다.' };
+                    const { error } = await supabase.auth.updateUser({ password: newPassword });
+                    if (error) return { success: false, message: error.message };
+                    setAdminPasswordChanged();
+                    return { success: true, message: '비밀번호가 변경되었습니다.' };
+                },
+
+                async sendPasswordReset(email) {
+                    if (!supabase) return { success: false, message: 'Supabase가 설정되지 않았습니다.' };
+                    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + window.location.pathname + '#/forgot-password' });
+                    if (error) return { success: false, message: error.message };
+                    return { success: true, message: '비밀번호 재설정 이메일을 발송했습니다.' };
+                },
+
                 sendVerificationCode(target, type) {
+                    if (type === 'email') return null;
                     const code = generateVerificationCode();
                     const expiresAt = new Date(Date.now() + VERIFICATION_TIMEOUT_SECONDS * 1000).toISOString();
-
                     const codes = getVerificationCodes();
-                    const existingIndex = codes.findIndex(c => c.target === target && c.type === type);
-
-                    if (existingIndex >= 0) {
-                        codes[existingIndex] = {
-                            target,
-                            type,
-                            code,
-                            expires_at: expiresAt,
-                            verified: false,
-                            attempts: 0
-                        };
-                    } else {
-                        codes.push({
-                            target,
-                            type,
-                            code,
-                            expires_at: expiresAt,
-                            verified: false,
-                            attempts: 0
-                        });
-                    }
-
+                    const index = codes.findIndex(c => c.target === target && c.type === type);
+                    const entry = { target, type, code, expires_at: expiresAt, verified: false, attempts: 0 };
+                    if (index >= 0) codes[index] = entry; else codes.push(entry);
                     saveVerificationCodes(codes);
+                    console.warn(`[NOVAULT DEV] ${type} verification code:`, code);
                     return code;
                 },
 
                 verifyCode(target, type, inputCode) {
+                    if (type === 'email') return { success: true, message: 'Supabase 이메일 인증을 사용합니다.' };
                     const codes = getVerificationCodes();
                     const codeEntry = codes.find(c => c.target === target && c.type === type);
-
-                    if (!codeEntry) {
-                        return { success: false, message: '인증번호를 먼저 발급받아주세요.' };
-                    }
-
-                    if (new Date(codeEntry.expires_at) < new Date()) {
-                        return { success: false, message: '인증번호가 만료되었습니다. 재발급해주세요.' };
-                    }
-
-                    if (codeEntry.verified) {
-                        return { success: true, message: '이미 인증이 완료되었습니다.' };
-                    }
-
-                    if (codeEntry.attempts >= VERIFICATION_MAX_ATTEMPTS) {
-                        return { success: false, message: '인증번호 오입력 횟수를 초과했습니다. 재발급해주세요.' };
-                    }
-
-                    if (codeEntry.code !== inputCode) {
-                        codeEntry.attempts += 1;
-                        saveVerificationCodes(codes);
-                        const remaining = VERIFICATION_MAX_ATTEMPTS - codeEntry.attempts;
-                        return {
-                            success: false,
-                            message: `인증번호가 일치하지 않습니다. (남은 시도: ${remaining}회)`
-                        };
-                    }
-
-                    codeEntry.verified = true;
-                    saveVerificationCodes(codes);
-                    return { success: true, message: '인증이 완료되었습니다.' };
+                    if (!codeEntry) return { success: false, message: '인증번호를 먼저 발급받아주세요.' };
+                    if (new Date(codeEntry.expires_at) < new Date()) return { success: false, message: '인증번호가 만료되었습니다.' };
+                    if (codeEntry.code !== inputCode) { codeEntry.attempts += 1; saveVerificationCodes(codes); return { success: false, message: '인증번호가 일치하지 않습니다.' }; }
+                    codeEntry.verified = true; saveVerificationCodes(codes); return { success: true, message: '인증이 완료되었습니다.' };
                 },
-
                 isVerified(target, type) {
-                    const codes = getVerificationCodes();
-                    const codeEntry = codes.find(c => c.target === target && c.type === type);
-                    return codeEntry && codeEntry.verified === true;
+                    if (type === 'email') return true;
+                    const entry = getVerificationCodes().find(c => c.target === target && c.type === type);
+                    return Boolean(entry && entry.verified);
                 },
-
                 getRemainingTime(target, type) {
-                    const codes = getVerificationCodes();
-                    const codeEntry = codes.find(c => c.target === target && c.type === type);
-                    if (!codeEntry) return 0;
-                    const remaining = new Date(codeEntry.expires_at).getTime() - Date.now();
-                    return Math.max(0, Math.floor(remaining / 1000));
+                    const entry = getVerificationCodes().find(c => c.target === target && c.type === type);
+                    if (!entry) return 0;
+                    return Math.max(0, Math.floor((new Date(entry.expires_at).getTime() - Date.now()) / 1000));
                 },
-
                 updateProfile(userId, data) {
-                    const users = getUsers();
-                    const user = users.find(u => u.id === userId);
-                    if (!user) return { success: false, message: '사용자를 찾을 수 없습니다.' };
-
-                    if (data.name) user.name = data.name;
-                    if (data.phone) user.phone = data.phone;
-
-                    saveUsers(users);
+                    const user = getCurrentUser();
+                    if (!user || user.id !== userId || !supabase) return { success: false, message: '로그인이 필요합니다.' };
+                    cacheCurrentUser({ ...user, ...data });
+                    supabase.from('profiles').update({ name: data.name, phone: data.phone }).eq('id', userId).then(({ error }) => { if (error) console.warn(error.message); });
                     return { success: true, message: '프로필이 수정되었습니다.' };
-                },
-
-                resetPassword(email, newPassword) {
-                    const users = getUsers();
-                    const user = users.find(u => u.email === email);
-                    if (!user) return { success: false, message: '존재하지 않는 이메일입니다.' };
-
-                    user.password_hash = btoa(newPassword);
-                    saveUsers(users);
-                    return { success: true, message: '비밀번호가 재설정되었습니다.' };
-                },
-
-                changePassword(userId, newPassword) {
-                    const users = getUsers();
-                    const user = users.find(u => u.id === userId);
-                    if (!user) return { success: false, message: '사용자를 찾을 수 없습니다.' };
-
-                    user.password_hash = btoa(newPassword);
-                    saveUsers(users);
-                    return { success: true, message: '비밀번호가 변경되었습니다.' };
                 }
             };
+
+            async function hydrateSupabaseAuth() {
+                if (!supabase) return;
+                const { data: { user }, error } = await supabase.auth.getUser();
+                if (error || !user) { clearSession(); return; }
+                let profile = null;
+                const { data } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
+                profile = data || { id: user.id, email: user.email, name: user.user_metadata?.name || '', phone: user.user_metadata?.phone || '', is_admin: false, email_verified: Boolean(user.email_confirmed_at), created_at: user.created_at };
+                cacheCurrentUser(profile);
+                setSession(profile.id, profile.is_admin, true);
+            }
 
             // ============================================================
             //  SECTION 6: PRODUCT SERVICE
@@ -2463,48 +2402,65 @@
             //  SECTION 8: ORDER SERVICE
             // ============================================================
 
+            const PaymentService = {
+                async requestPayment(order) {
+                    if (!TOSS_CLIENT_KEY || typeof window.TossPayments !== 'function') {
+                        return { success: false, message: '토스페이먼츠 설정이 없습니다. config.js의 tossClientKey를 설정해주세요.' };
+                    }
+                    if (!supabase || !PAYMENT_FUNCTION_URL) {
+                        return { success: false, message: '결제 승인용 Supabase Edge Function이 설정되지 않았습니다.' };
+                    }
+                    const tossPayments = TossPayments(TOSS_CLIENT_KEY);
+                    const customerKey = crypto.randomUUID();
+                    const widgets = tossPayments.widgets({ customerKey });
+                    await widgets.setAmount({ currency: 'KRW', value: order.total_price });
+
+                    showModal('결제 수단 선택', `
+                        <div id="novault-payment-method" style="min-height:220px;"></div>
+                        <div id="novault-payment-agreement" style="margin-top:12px;"></div>
+                    `, [
+                        { text: '취소', className: 'btn-secondary' },
+                        { text: '결제하기', className: 'btn-primary', onClick: async () => {
+                            try {
+                                await widgets.requestPayment({
+                                    orderId: order.id.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64),
+                                    orderName: order.items.length > 1 ? `${order.items[0].product_name} 외 ${order.items.length - 1}건` : order.items[0].product_name,
+                                    customerEmail: getCurrentUser()?.email,
+                                    customerName: getCurrentUser()?.name,
+                                    customerMobilePhone: (getCurrentUser()?.phone || '').replace(/[^0-9]/g, ''),
+                                    successUrl: `${window.location.origin}${window.location.pathname}#/payment/success`,
+                                    failUrl: `${window.location.origin}${window.location.pathname}#/payment/fail`,
+                                    windowTarget: window.innerWidth < 768 ? 'self' : 'iframe'
+                                });
+                            } catch (e) { showToast(e?.message || '결제를 시작할 수 없습니다.', 'error'); }
+                        }}
+                    ]);
+                    await widgets.renderPaymentMethods({ selector: '#novault-payment-method', variantKey: TOSS_WIDGET_VARIANT_KEY });
+                    await widgets.renderAgreement({ selector: '#novault-payment-agreement', variantKey: TOSS_WIDGET_VARIANT_KEY });
+                    return { success: true };
+                }
+            };
+
             const OrderService = {
-                createOrder(cartItems) {
+                async createPendingOrder(cartItems) {
                     const user = getCurrentUser();
                     if (!user) return { success: false, message: '로그인이 필요합니다.' };
-
-                    if (cartItems.length === 0) {
-                        return { success: false, message: '주문할 상품이 없습니다.' };
-                    }
-
+                    if (!cartItems.length) return { success: false, message: '주문할 상품이 없습니다.' };
                     const orderItems = cartItems.map(item => {
                         const product = ProductService.getProductById(item.product_id);
-                        return {
-                            product_id: item.product_id,
-                            product_name: product ? product.name : '삭제된 상품',
-                            size: item.size,
-                            color: item.color,
-                            quantity: item.quantity,
-                            price: product ? ProductService.getDiscountedPrice(product) : 0
-                        };
+                        return { product_id: item.product_id, product_name: product ? product.name : '삭제된 상품', size: item.size, color: item.color, quantity: item.quantity, price: product ? ProductService.getDiscountedPrice(product) : 0 };
                     });
-
-                    const totalPrice = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-                    const order = {
-                        id: generateId('order'),
-                        user_id: user.id,
-                        user_name: user.name,
-                        status: '결제완료',
-                        total_price: totalPrice,
-                        items: orderItems,
-                        created_at: new Date().toISOString()
-                    };
-
-                    const orders = getOrders();
-                    orders.push(order);
-                    saveOrders(orders);
-
-                    // Clear cart
-                    CartService.clearCart();
-
-                    return { success: true, message: '주문이 완료되었습니다.', order };
+                    const totalPrice = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+                    const order = { id: generateId('order'), user_id: user.id, user_name: user.name, status: '결제대기', total_price: totalPrice, items: orderItems, created_at: new Date().toISOString() };
+                    const orders = getOrders(); orders.push(order); saveOrders(orders);
+                    if (supabase) {
+                        const { error } = await supabase.from('orders').insert({ id: order.id, user_id: order.user_id, user_name: order.user_name, status: order.status, total_price: order.total_price, items: order.items, created_at: order.created_at });
+                        if (error) { console.warn('Order DB insert failed:', error.message); return { success: false, message: '주문 정보를 저장하지 못했습니다.' }; }
+                    }
+                    return { success: true, message: '주문서가 생성되었습니다.', order };
                 },
+
+                createOrder(cartItems) { return this.createPendingOrder(cartItems); },
 
                 getUserOrders() {
                     const user = getCurrentUser();
@@ -3465,17 +3421,12 @@
                 renderCartPage(document.getElementById('main-content'));
             }
 
-            function handleCheckout() {
+            async function handleCheckout() {
                 const cartItems = CartService.getCart();
-                const result = OrderService.createOrder(cartItems);
-                if (result.success) {
-                    showToast(result.message, 'success');
-                    renderHeader();
-                    renderMobileNav();
-                    navigate('/mypage');
-                } else {
-                    showToast(result.message, 'error');
-                }
+                const result = await OrderService.createPendingOrder(cartItems);
+                if (!result.success) { showToast(result.message, 'error'); return; }
+                const payment = await PaymentService.requestPayment(result.order);
+                if (!payment.success) { showToast(payment.message, 'error'); return; }
             }
 
             // ============================================================
@@ -3546,14 +3497,13 @@
                             <span class="section-link" onclick="navigate('/forgot-password')">비밀번호 찾기</span>
                         </div>
                         <div style="text-align: center; padding: 16px; background: var(--gray-bg); border-radius: var(--radius-sm);">
-                            <p style="font-size: 12px; color: var(--gray-400);">데모 계정: user@demo.com / User1234!</p>
-                            <p style="font-size: 12px; color: var(--gray-400); margin-top: 4px;">관리자 계정: admin@shopmall.com / Admin1234! (관리자 로그인에서)</p>
+                            <p style="font-size: 12px; color: var(--gray-400);">안전한 Supabase Auth 계정으로 로그인하세요.</p>
                         </div>
                     </section>
                 `;
 
                 const form = document.getElementById('login-form');
-                form.addEventListener('submit', (e) => {
+                form.addEventListener('submit', async (e) => {
                     e.preventDefault();
                     const email = document.getElementById('login-email').value.trim();
                     const password = document.getElementById('login-password').value;
@@ -3585,7 +3535,7 @@
 
                     if (hasError) return;
 
-                    const result = AuthService.login(email, password, remember);
+                    const result = await AuthService.login(email, password, remember);
                     if (result.success) {
                         showToast(result.message, 'success');
                         renderHeader();
@@ -3597,8 +3547,8 @@
                 });
             }
 
-            function handleLogout() {
-                AuthService.logout();
+            async function handleLogout() {
+                await AuthService.logout();
                 showToast('로그아웃 되었습니다.', 'info');
                 renderHeader();
                 renderMobileNav();
@@ -3983,7 +3933,7 @@
                 }
             });
 
-            function handleSignupSubmit() {
+            async function handleSignupSubmit() {
                 const email = document.getElementById('signup-email').value.trim();
                 const password = document.getElementById('signup-password').value;
                 const passwordConfirm = document.getElementById('signup-password-confirm').value;
@@ -4007,7 +3957,7 @@
                     return;
                 }
 
-                const result = AuthService.register({
+                const result = await AuthService.register({
                     email,
                     password,
                     phone,
@@ -4053,7 +4003,7 @@
                 `;
 
                 const form = document.getElementById('forgot-form');
-                form.addEventListener('submit', (e) => {
+                form.addEventListener('submit', async (e) => {
                     e.preventDefault();
                     const email = document.getElementById('forgot-email').value.trim();
                     const errorEl = document.getElementById('forgot-email-error');
@@ -4066,40 +4016,39 @@
                         return;
                     }
 
-                    const users = getUsers();
-                    const user = users.find(u => u.email === email);
-                    if (!user) {
-                        errorEl.textContent = '등록되지 않은 이메일입니다.';
+                    const result = await AuthService.sendPasswordReset(email);
+                    if (!result.success) {
+                        errorEl.textContent = result.message;
                         errorEl.style.display = 'block';
                         return;
                     }
-
-                    showToast('비밀번호 재설정 안내를 발송했습니다. (개발 모드)', 'success');
-                    showModal('비밀번호 재설정', `
-                        <p style="font-size: 14px; margin-bottom: 12px;">새 비밀번호를 입력해주세요.</p>
-                        <div class="form-group">
-                            <label>새 비밀번호</label>
-                            <input type="password" id="reset-password" placeholder="새 비밀번호">
-                        </div>
-                        <div class="form-group">
-                            <label>새 비밀번호 확인</label>
-                            <input type="password" id="reset-password-confirm" placeholder="새 비밀번호 확인">
-                        </div>
-                    `, [
-                        { text: '취소', className: 'btn-secondary' },
-                        { text: '변경하기', className: 'btn-primary', onClick: () => {
-                            const newPassword = document.getElementById('reset-password').value;
-                            const confirmPassword = document.getElementById('reset-password-confirm').value;
-                            if (newPassword !== confirmPassword) {
-                                showToast('비밀번호가 일치하지 않습니다.', 'error');
-                                return;
-                            }
-                            const result = AuthService.resetPassword(email, newPassword);
-                            showToast(result.message, result.success ? 'success' : 'error');
-                            if (result.success) navigate('/login');
-                        }}
-                    ]);
+                    showToast(result.message, 'success');
                 });
+            }
+
+            function renderLoadingPage(container, message) {
+                container.innerHTML = `<section style="padding:120px 24px;text-align:center;"><div class="container"><div style="font-size:20px;font-weight:700;">${escapeHtml(message)}</div><div style="margin-top:12px;color:var(--gray-400);">잠시만 기다려주세요.</div></div></section>`;
+            }
+
+            async function handlePaymentRedirect(success) {
+                const params = new URLSearchParams(window.location.hash.split('?')[1] || '');
+                if (!success) { showToast(params.get('message') || '결제가 취소되었습니다.', 'error'); navigate('/cart'); return; }
+                const orderId = params.get('orderId');
+                const paymentKey = params.get('paymentKey');
+                const amount = Number(params.get('amount'));
+                if (!orderId || !paymentKey || !amount || !PAYMENT_FUNCTION_URL) { showToast('결제 결과가 올바르지 않습니다.', 'error'); navigate('/cart'); return; }
+                try {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    const response = await fetch(PAYMENT_FUNCTION_URL, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json', ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}) },
+                        body: JSON.stringify({ orderId, paymentKey, amount })
+                    });
+                    const result = await response.json();
+                    if (!response.ok || !result.success) throw new Error(result.message || '결제 승인에 실패했습니다.');
+                    CartService.clearCart();
+                    showToast('결제가 완료되었습니다.', 'success');
+                    renderHeader(); renderMobileNav(); navigate('/mypage');
+                } catch (e) { showToast(e.message || '결제 승인에 실패했습니다.', 'error'); }
             }
 
             // ============================================================
@@ -4213,7 +4162,7 @@
                     </div>
                 `, [
                     { text: '취소', className: 'btn-secondary' },
-                    { text: '변경', className: 'btn-primary', onClick: () => {
+                    { text: '변경', className: 'btn-primary', onClick: async () => {
                         const newPassword = document.getElementById('change-password').value;
                         const confirmPassword = document.getElementById('change-password-confirm').value;
                         if (newPassword !== confirmPassword) {
@@ -4224,7 +4173,7 @@
                             showToast('비밀번호 규칙을 확인해주세요.', 'error');
                             return;
                         }
-                        const result = AuthService.changePassword(user.id, newPassword);
+                        const result = await AuthService.changePassword(user.id, newPassword);
                         showToast(result.message, result.success ? 'success' : 'error');
                     }}
                 ]);
@@ -4314,7 +4263,7 @@
                 `;
 
                 const form = document.getElementById('admin-login-form');
-                form.addEventListener('submit', (e) => {
+                form.addEventListener('submit', async (e) => {
                     e.preventDefault();
                     const email = document.getElementById('admin-email').value.trim();
                     const password = document.getElementById('admin-password').value;
@@ -4335,7 +4284,7 @@
                         return;
                     }
 
-                    const result = AuthService.login(email, password, false);
+                    const result = await AuthService.login(email, password, false);
                     if (result.success && result.user.is_admin) {
                         showToast('관리자 로그인 성공', 'success');
                         if (!getAdminPasswordChanged()) {
@@ -4352,7 +4301,7 @@
                                 </div>
                             `, [
                                 { text: '나중에', className: 'btn-secondary', onClick: () => { navigate('/admin'); } },
-                                { text: '변경', className: 'btn-primary', onClick: () => {
+                                { text: '변경', className: 'btn-primary', onClick: async () => {
                                     const newPw = document.getElementById('admin-new-password').value;
                                     const confirmPw = document.getElementById('admin-new-password-confirm').value;
                                     if (newPw !== confirmPw) {
@@ -4363,7 +4312,7 @@
                                         showToast('비밀번호 규칙을 확인해주세요.', 'error');
                                         return;
                                     }
-                                    const result = AuthService.changePassword(result.user.id, newPw);
+                                    const result = await AuthService.changePassword(result.user.id, newPw);
                                     if (result.success) {
                                         setAdminPasswordChanged();
                                         showToast('비밀번호가 변경되었습니다.', 'success');
@@ -4376,7 +4325,7 @@
                         }
                     } else if (result.success) {
                         showToast('관리자 계정이 아닙니다.', 'error');
-                        AuthService.logout();
+                        await AuthService.logout();
                     } else {
                         showToast(result.message, 'error');
                     }
@@ -4956,6 +4905,7 @@
             function init() {
                 seedData();
                 handleRoute();
+                hydrateSupabaseAuth().then(() => handleRoute()).catch(err => console.warn('Auth hydration failed:', err));
 
                 // Attempt to sync data from Supabase (async)
                 if (supabase) {
@@ -4980,6 +4930,7 @@
                 window.updateCartQty = updateCartQty;
                 window.removeCartItem = removeCartItem;
                 window.handleCheckout = handleCheckout;
+                window.handlePaymentRedirect = handlePaymentRedirect;
                 window.goToHeroSlide = goToHeroSlide;
                 window.handleCategoryFilterChange = handleCategoryFilterChange;
                 window.handleSortFilterChange = handleSortFilterChange;
