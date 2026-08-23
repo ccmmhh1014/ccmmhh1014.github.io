@@ -915,9 +915,43 @@
   async function requireReady(){if(!SUPABASE_READY){toast("Supabase 설정이 필요합니다. HTML 상단의 URL과 publishable key를 입력하세요.","error");return false}return true}
 
   async function loadProfile(userId){
+    // Auth 로그인은 성공했지만 profiles 행이 없으면 UI가 로그아웃 상태처럼
+    // 보이는 문제를 방지하기 위해 프로필을 자동 생성합니다.
     const {data,error}=await sb.from("profiles").select("*").eq("id",userId).maybeSingle();
-    if(error){console.error(error);toast("프로필을 불러오지 못했습니다.","error");return null}
-    return data;
+    if(error){
+      console.error("profiles select:", error);
+      toast("프로필 정보를 불러오지 못했습니다. Supabase RLS/SQL 설정을 확인하세요.","error");
+      return null;
+    }
+    if(data) return data;
+
+    const {data:{user},error:userError}=await sb.auth.getUser();
+    if(userError || !user){
+      console.error("auth user:", userError);
+      return null;
+    }
+
+    const nickname =
+      user.user_metadata?.nickname ||
+      (user.email ? user.email.split("@")[0] : "사용자");
+
+    const {data:created,error:createError}=await sb
+      .from("profiles")
+      .insert({
+        id:user.id,
+        nickname,
+        bio:"",
+        avatar_url:null
+      })
+      .select("*")
+      .single();
+
+    if(createError){
+      console.error("profiles insert:", createError);
+      toast("로그인은 되었지만 프로필 생성에 실패했습니다. Supabase SQL/RLS를 확인하세요.","error");
+      return null;
+    }
+    return created;
   }
   async function loadAll(){
     if(!await requireReady())return;
@@ -1021,13 +1055,86 @@
 
   $$(".share-btn").forEach(b=>b.onclick=async()=>{const p=posts.find(x=>x.id===state.openId),url=location.href.split("#")[0]+"#post-"+p.id;if(b.dataset.share==="link"){try{await navigator.clipboard.writeText(url);toast("게시글 링크를 복사했습니다.","success")}catch{toast("링크 복사에 실패했습니다.","error")}}else{const text=encodeURIComponent(p.title+" — 잔여백");const target=b.dataset.share==="x"?`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(url)}`:b.dataset.share==="fb"?`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`:"";if(target)window.open(target,"share","noopener,noreferrer,width=620,height=520");else toast("카카오 공유는 카카오 SDK 연결 후 사용할 수 있습니다.")}});
 
-  async function refreshUser(){if(!SUPABASE_READY)return;const {data:{user}}=await sb.auth.getUser();state.user=user?await loadProfile(user.id):null;await loadAll()}
+  async function refreshUser(){
+    if(!SUPABASE_READY)return;
+    const {data:{user},error}=await sb.auth.getUser();
+    if(error){
+      console.error("getUser:", error);
+      state.user=null;
+    }else{
+      state.user=user?await loadProfile(user.id):null;
+    }
+    renderAll();
+    await loadAll();
+  }
   async function registerVisit(){if(!SUPABASE_READY)return;const r=await sb.from("site_visits").insert({page:location.pathname,referrer:document.referrer||null});if(r.error)console.warn("visit",r.error.message);const {count}=await sb.from("site_visits").select("id",{count:"exact",head:true});visitorCount=count||0}
 
   function initSupabase(){
-    if(!SUPABASE_READY){$("#loadingScreen").classList.add("hide");toast("Supabase 설정 전 미리보기 상태입니다. 파일 상단의 설정값을 입력하면 실제 DB/Auth/Storage가 활성화됩니다.","error");return}
-    sb.auth.getSession().then(async({data})=>{state.user=data.session?await loadProfile(data.session.user.id):null;await registerVisit();await loadAll();$("#loadingScreen").classList.add("hide")});
-    sb.auth.onAuthStateChange(async(_event,session)=>{state.user=session?await loadProfile(session.user.id):null;await loadAll()});
+    if(!SUPABASE_READY){
+      $("#loadingScreen").classList.add("hide");
+      toast("Supabase 설정 전 미리보기 상태입니다. 파일 상단의 설정값을 입력하면 실제 DB/Auth/Storage가 활성화됩니다.","error");
+      return;
+    }
+
+    // 최초 로딩: 현재 세션을 먼저 UI에 반영
+    sb.auth.getSession().then(async({data,error})=>{
+      if(error) console.error("getSession:", error);
+
+      if(data?.session){
+        // 인증 세션 자체를 먼저 반영하여 로그인 UI가 즉시 바뀌도록 함
+        state.user = {
+          id:data.session.user.id,
+          email:data.session.user.email,
+          is_admin:false
+        };
+        renderAll();
+
+        const loadedProfile = await loadProfile(data.session.user.id);
+        state.user = loadedProfile
+          ? {...data.session.user, ...loadedProfile}
+          : state.user;
+      }else{
+        state.user=null;
+      }
+
+      renderAll();
+      await registerVisit();
+      await loadAll();
+      $("#loadingScreen").classList.add("hide");
+    });
+
+    // 로그인/로그아웃/세션 갱신 감지
+    sb.auth.onAuthStateChange((event,session)=>{
+      // 콜백 내부에서 Supabase API를 직접 await하지 않고 다음 tick에서 처리
+      // 하여 Auth 내부 락과 충돌하는 문제를 피합니다.
+      setTimeout(async()=>{
+        if(session){
+          state.user = {
+            id:session.user.id,
+            email:session.user.email,
+            is_admin:false
+          };
+          renderAll();
+
+          const loadedProfile = await loadProfile(session.user.id);
+          if(loadedProfile){
+            state.user = {...session.user,...loadedProfile};
+          }
+          renderAll();
+          await loadAll();
+
+          if(event==="SIGNED_IN"){
+            closeModal("authModal");
+            toast("로그인되었습니다.","success");
+          }
+        }else{
+          state.user=null;
+          renderAll();
+          await loadAll();
+          if(event==="SIGNED_OUT") toast("로그아웃되었습니다.","success");
+        }
+      },0);
+    });
   }
   initSupabase();
 })();
