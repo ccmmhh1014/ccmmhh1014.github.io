@@ -497,7 +497,7 @@
   .sort-btn.active{background:var(--text-primary);color:var(--bg);border-color:var(--text-primary);}
 
   .post-actions{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap;}
-  .post-action{border:1px solid var(--border);background:var(--surface);color:var(--text-secondary);border-radius:999px;padding:6px 9px;font-size:11px;cursor:pointer;transition:transform 0.15s var(--ease),background 0.15s var(--ease),color 0.15s var(--ease);}
+  .post-action{border:1px solid var(--border);background:var(--surface);color:var(--text-secondary);border-radius:999px;padding:9px 13px;font-size:12px;cursor:pointer;transition:transform 0.15s var(--ease),background 0.15s var(--ease),color 0.15s var(--ease);}
   .post-action:hover{color:var(--text-primary);background:var(--bg-elevated);}
   .post-action.active{font-weight:800;color:#e0245e;background:color-mix(in srgb, #e0245e 12%, var(--bg-elevated));border-color:color-mix(in srgb, #e0245e 30%, var(--border));}
   .post-action.active:active,.post-action:active{transform:scale(0.94);}
@@ -1072,11 +1072,13 @@
   $("#bgmAudio").addEventListener("play",()=>{$("#bgmToggle").classList.add("playing");$("#bgmToggle").textContent="🔊"});
   $("#bgmAudio").addEventListener("pause",()=>{$("#bgmToggle").classList.remove("playing");$("#bgmToggle").textContent="🔇"});
   $("#bgmToggle").onclick=()=>{const audio=$("#bgmAudio");if(!audio.getAttribute("src"))return;if(audio.paused)audio.play().catch(()=>toast("배경음악 재생에 실패했습니다.","error"));else audio.pause()};
+  function tryAutoStartBgm(){const audio=$("#bgmAudio");if(audio.getAttribute("src")&&audio.paused){audio.play().then(()=>document.removeEventListener("click",tryAutoStartBgm,true)).catch(()=>{})}}
+  document.addEventListener("click",tryAutoStartBgm,true);
 
   async function toggleBookmark(id){if(!state.user){toast("북마크하려면 로그인하세요.","error");openAuth("login");return}const {data}=await sb.from("bookmarks").select("post_id").eq("post_id",id).eq("user_id",state.user.id).maybeSingle();const r=data?await sb.from("bookmarks").delete().eq("post_id",id).eq("user_id",state.user.id):await sb.from("bookmarks").insert({post_id:id,user_id:state.user.id});if(r.error){console.error(r.error);toast("북마크 처리에 실패했습니다.","error");return}toast(data?"북마크에서 제거했습니다.":"북마크에 저장했습니다.",data?"":"success");await loadAll();if(state.openId===id)openPost(id)}
   $("#modalLikeBtn").onclick=()=>toggleLike(state.openId);$("#modalBookmarkBtn").onclick=()=>toggleBookmark(state.openId);
 
-  document.body.onclick=e=>{const op=e.target.closest("[data-open]");if(op&&!e.target.closest("button")){e.preventDefault();openPost(op.dataset.open);return}const like=e.target.closest("[data-like]");if(like){e.stopPropagation();toggleLike(like.dataset.like);return}const bm=e.target.closest("[data-bookmark]");if(bm){e.stopPropagation();toggleBookmark(bm.dataset.bookmark);return}const tag=e.target.closest("[data-tag]");if(tag){e.preventDefault();state.search=tag.dataset.tag;state.page=1;$("#searchInput").value=state.search;closePost();renderFeed()}};
+  document.body.onclick=e=>{const op=e.target.closest("[data-open]");if(op&&!e.target.closest("button")&&!e.target.closest(".post-actions")){e.preventDefault();openPost(op.dataset.open);return}const like=e.target.closest("[data-like]");if(like){e.preventDefault();e.stopPropagation();toggleLike(like.dataset.like);return}const bm=e.target.closest("[data-bookmark]");if(bm){e.preventDefault();e.stopPropagation();toggleBookmark(bm.dataset.bookmark);return}const tag=e.target.closest("[data-tag]");if(tag){e.preventDefault();state.search=tag.dataset.tag;state.page=1;$("#searchInput").value=state.search;closePost();renderFeed()}};
   document.onkeydown=e=>{if(e.key==="Enter"){const c=e.target.closest(".post-card");if(c)openPost(c.dataset.open)}if(e.key==="Escape"){closePost();closeSearch();closeMobileMenu()}};
 
   const searchOverlay=$("#searchOverlay");function openSearch(){searchOverlay.classList.add("open");setTimeout(()=>$("#searchInput").focus(),50)}function closeSearch(){searchOverlay.classList.remove("open")};$("#searchBtn").onclick=openSearch;searchOverlay.onclick=e=>{if(e.target===searchOverlay)closeSearch()};$("#searchInput").oninput=e=>{state.search=e.target.value.trim();state.page=1;renderFeed()};
