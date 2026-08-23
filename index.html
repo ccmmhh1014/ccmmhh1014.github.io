@@ -636,7 +636,7 @@
 
 <header class="site-header">
   <div class="brand">
-    <div class="mark" aria-hidden="true"></div>
+    <div class="mark" id="brandMark" aria-hidden="true"></div>
     <span>By ccmmhh</span>
   </div>
 
@@ -1036,6 +1036,9 @@
     $$("[data-cat]").forEach(a=>a.onclick=catClick);setActiveCats()
   }
   function catClick(e){e.preventDefault();state.cat=this.dataset.cat;state.page=1;state.search="";$("#searchInput").value="";setActiveCats();renderFeed();closeMobileMenu()}
+  function goHome(){closePost();closeSearch();closeMobileMenu();state.cat="all";state.search="";state.sort="latest";state.page=1;$("#searchInput").value="";$$('[data-sort]').forEach(x=>x.classList.remove("active"));$('[data-sort="latest"]').classList.add("active");setActiveCats();renderFeed();window.scrollTo({top:0,behavior:"smooth"})}
+  $(".brand").onclick=goHome;
+  $(".brand").style.cursor="pointer";
   function setActiveCats(){$$(".primary-nav [data-cat],.category-list [data-cat]").forEach(a=>a.classList.toggle("active",a.dataset.cat===state.cat))}
   function renderRecent(){const list=[...posts].slice(0,5);$("#recentList").innerHTML=list.map(p=>`<li><a href="#" data-open="${p.id}"><div class="r-title">${esc(p.title)}</div><div class="r-date">${fmtDate(p.published_at)}</div></a></li>`).join("")}
   function thumbHTML(p){return p.cover_image_url?`<div class="thumb" style="background-image:url('${esc(p.cover_image_url)}');background-size:cover;background-position:center"><span class="thumb-glyph">${esc(p.catLabel)}</span></div>`:`<div class="thumb" style="--tone:${p.tone}"><span class="thumb-glyph">${esc(p.catLabel)}</span></div>`}
@@ -1070,6 +1073,7 @@
     siteTags=(siteSettings.site_tags&&siteSettings.site_tags.length)?siteSettings.site_tags:["미니멀","일상","나무","조명","아침","종이","여백","도구"];
     document.title=siteName+" — 개인 블로그";
     const brandSpan=$(".brand span");if(brandSpan)brandSpan.textContent=siteName;
+    const mark=$("#brandMark");if(mark){if(siteSettings.logo_url){mark.style.backgroundImage=`url("${siteSettings.logo_url}")`;mark.style.backgroundSize="cover";mark.style.backgroundPosition="center"}else{mark.style.backgroundImage="";mark.style.backgroundSize="";mark.style.backgroundPosition=""}}
     const vn=$("#visitorNote");if(vn)vn.textContent=`오늘도 ${siteName}에 방문해 주셔서 감사합니다.`;
     const footer=$(".site-footer");if(footer)footer.textContent=`© 2026 ${siteName}. 조용한 기록을 남깁니다.`;
     const tc=$("#tagCloud");if(tc)tc.innerHTML=siteTags.map(t=>`<a href="#" data-tag="${esc(t)}">#${esc(t)}</a>`).join("");
@@ -1149,6 +1153,7 @@
     const url=siteSettings.bgm_url||"";
     $("#adminBgm").innerHTML=`
       <div class="bgm-admin-row"><label>사이트 이름</label><input type="text" id="siteNameInput" value="${esc(siteName)}" placeholder="By ccmmhh"><div class="form-actions" style="justify-content:flex-start"><button class="outline-btn" id="siteNameSaveBtn">이름 저장</button></div></div>
+      <div class="bgm-admin-row"><label>로고 이미지</label><input type="file" id="logoFileInput" accept="image/*"><div class="bgm-now">${siteSettings.logo_url?"현재 로고가 설정되어 있습니다.":"설정된 로고가 없습니다. 이미지를 올리면 기본 도형 대신 표시됩니다."}</div><div class="form-actions" style="justify-content:flex-start"><button class="outline-btn" id="logoRemoveBtn" ${siteSettings.logo_url?"":"disabled"}>로고 삭제</button></div></div>
       <div class="bgm-admin-row"><label>사이트 태그 (쉼표로 구분)</label><input type="text" id="siteTagsInput" value="${esc(siteTags.join(', '))}" placeholder="미니멀, 일상, 나무"><div class="form-actions" style="justify-content:flex-start"><button class="outline-btn" id="siteTagsSaveBtn">태그 저장</button></div></div>
       <div class="bgm-admin-row"><label>배경음악 파일 업로드 (mp3, m4a 등)</label><input type="file" id="bgmFileInput" accept="audio/*"><div class="bgm-now">${url?"현재 설정된 곡: "+esc(url):"설정된 배경음악이 없습니다. 파일을 올리면 모든 방문자에게 재생 버튼이 나타납니다."}</div><div class="form-actions" style="justify-content:flex-start"><button class="outline-btn" id="bgmRemoveBtn" ${url?"":"disabled"}>배경음악 삭제</button></div></div>`;
     $("#siteNameSaveBtn").onclick=async()=>{
@@ -1157,6 +1162,21 @@
       if(r.error){toast(r.error.message,"error");return}
       siteSettings.site_name=name;applySiteSettings();toast("사이트 이름이 변경되었습니다.","success")
     };
+    $("#logoFileInput").onchange=async e=>{
+      const file=e.target.files[0];if(!file)return;
+      const ext=file.name.split(".").pop().toLowerCase()||"png",path=`logo/${state.user.id}/${crypto.randomUUID()}.${ext}`;
+      const r=await sb.storage.from("blog-media").upload(path,file,{upsert:true,contentType:file.type});
+      if(r.error){toast(r.error.message,"error");return}
+      const {data}=sb.storage.from("blog-media").getPublicUrl(path);
+      const sr=await sb.from("site_settings").upsert({id:1,logo_url:data.publicUrl});
+      if(sr.error){toast(sr.error.message,"error");return}
+      siteSettings.logo_url=data.publicUrl;applySiteSettings();renderBgmAdmin();toast("로고가 설정되었습니다.","success")
+    };
+    $("#logoRemoveBtn").onclick=()=>confirmAction("로고를 삭제하시겠습니까?",async()=>{
+      const r=await sb.from("site_settings").upsert({id:1,logo_url:null});
+      if(r.error){toast(r.error.message,"error");return}
+      siteSettings.logo_url=null;applySiteSettings();renderBgmAdmin();toast("로고가 삭제되었습니다.","success")
+    });
     $("#siteTagsSaveBtn").onclick=async()=>{
       const tags=$("#siteTagsInput").value.split(",").map(t=>t.trim()).filter(Boolean);
       const r=await sb.from("site_settings").upsert({id:1,site_tags:tags});
