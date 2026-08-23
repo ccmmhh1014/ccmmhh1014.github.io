@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ccmmhh의 블로그 — 개인 블로그</title>
+<title>By ccmmhh — 개인 블로그</title>
 <style>
   @font-face {
     font-family: 'Pretendard';
@@ -455,7 +455,7 @@
     .modal-hero{ aspect-ratio:16/9; }
   }
 
-  /* ===== ccmmhh의 블로그 v2 enhancement layer ===== */
+  /* ===== 잔여백 v2 enhancement layer ===== */
   :root{
     --accent:#111;
     --danger:#d92d20;
@@ -572,8 +572,14 @@
   .bgm-toggle.playing{background:var(--text-primary);color:var(--bg);animation:bgmPulse 2.2s ease-in-out infinite;}
   @keyframes bgmPulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb, var(--text-primary) 22%, transparent)}50%{box-shadow:0 0 0 8px color-mix(in srgb, var(--text-primary) 0%, transparent)}}
   @media (max-width:640px){.bgm-toggle{left:12px;bottom:76px;width:44px;height:44px;font-size:17px;}}
+
+  .instagram-fab{position:fixed;right:18px;bottom:18px;z-index:190;width:48px;height:48px;border-radius:50%;border:1px solid var(--border);background:var(--bg-elevated);box-shadow:var(--shadow-md);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform 0.2s var(--ease),background 0.2s var(--ease);}
+  .instagram-fab:hover{transform:translateY(-2px) scale(1.04);}
+  .instagram-fab svg{width:22px;height:22px;}
+  @media (max-width:640px){.instagram-fab{right:12px;bottom:76px;width:44px;height:44px;}.instagram-fab svg{width:20px;height:20px;}}
   .bgm-admin-row{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;}
   .bgm-admin-row label{font-size:12px;font-weight:700;color:var(--text-secondary);}
+  .bgm-admin-row input[type="text"]{border:1px solid var(--border);background:var(--bg);border-radius:var(--radius-sm);padding:10px 12px;font:inherit;color:var(--text-primary);}
   .bgm-now{font-size:12px;color:var(--text-tertiary);word-break:break-all;}
   .toast{min-width:240px;max-width:min(360px,calc(100vw - 36px));padding:12px 14px;border:1px solid var(--border);background:var(--bg-elevated);box-shadow:var(--shadow-md);border-radius:14px;font-size:12px;line-height:1.5;animation:toastIn .28s var(--ease);}
   .toast.success{border-color:color-mix(in srgb,var(--success) 28%,var(--border));}
@@ -616,6 +622,9 @@
   <div class="toast-stack" id="toastStack" aria-live="polite"></div>
   <audio id="bgmAudio" loop preload="none"></audio>
   <button class="bgm-toggle" id="bgmToggle" style="display:none" aria-label="배경음악 재생">🔇</button>
+  <a class="instagram-fab" href="https://www.instagram.com/ccmmhh" target="_blank" rel="noopener noreferrer" aria-label="인스타그램 프로필로 이동">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg>
+  </a>
 
   <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
     <div id="mobileCategoryLinks"></div>
@@ -628,7 +637,7 @@
 <header class="site-header">
   <div class="brand">
     <div class="mark" aria-hidden="true"></div>
-    <span>ccmmhh의 블로그</span>
+    <span>By ccmmhh</span>
   </div>
 
   <nav class="primary-nav" aria-label="주요 카테고리">
@@ -668,7 +677,7 @@
       </div>
       <p class="profile-intro" id="profileIntro">조용한 사물과 공간, 하루의 결을 기록합니다.</p>
       <button class="outline-btn profile-edit-btn" id="profileEditBtn">프로필 관리</button>
-      <div class="visitor-note" id="visitorNote">오늘도 블로그에 방문해 주셔서 감사합니다.</div>
+      <div class="visitor-note" id="visitorNote">오늘도 By ccmmhh에 방문해 주셔서 감사합니다.</div>
     </div>
 
     <div class="card">
@@ -690,11 +699,7 @@
 
     <div class="card">
       <h3>태그</h3>
-      <div class="tag-cloud">
-        <a href="#">#일상</a><a href="#">#음식</a><a href="#">#풍경</a>
-        <a href="#">#음악</a><a href="#">#영화</a><a href="#">#종이</a>
-        <a href="#">#여백</a><a href="#">#도구</a>
-      </div>
+      <div class="tag-cloud" id="tagCloud"></div>
     </div>
   </aside>
 
@@ -720,7 +725,7 @@
 </div>
 
 <footer class="site-footer">
-  © 2026 ccmmhh의 블로그. 조용한 기록을 남깁니다.
+  © 2026 By ccmmhh. 조용한 기록을 남깁니다.
 </footer>
 
 <div class="modal-overlay" id="modalOverlay">
@@ -820,7 +825,7 @@
         <button class="admin-tab" data-admin-tab="posts">게시글</button>
         <button class="admin-tab" data-admin-tab="categories">카테고리</button>
         <button class="admin-tab" data-admin-tab="comments">댓글</button>
-        <button class="admin-tab" data-admin-tab="bgm">배경음악</button>
+        <button class="admin-tab" data-admin-tab="bgm">사이트 설정</button>
       </div>
       <div class="admin-pane active" id="adminDashboard"></div>
       <div class="admin-pane" id="adminPosts"></div>
@@ -887,6 +892,7 @@
   let posts=[], comments=[], categories=[], drafts=[];
   let myLikedSet=new Set(), myBookmarkedSet=new Set();
   let siteSettings={};
+  let siteName="By ccmmhh",siteTags=["미니멀","일상","나무","조명","아침","종이","여백","도구"];
   let profile=null, pendingConfirm=null, authMode="login";
   let visitorCount=0;
 
@@ -996,7 +1002,7 @@
     ]);
     if(pc.error)console.error(pc.error); if(cc.error)console.error(cc.error); if(ct.error)console.error(ct.error); if(dr.error)console.error(dr.error); if(lk.error)console.error(lk.error); if(bm.error)console.error(bm.error);
     if(!ss.error)siteSettings=ss.data||{};else console.warn("site_settings:",ss.error.message);
-    applyBgm();
+    applyBgm();applySiteSettings();
     const likeCountMap={};myLikedSet=new Set();
     (lk.data||[]).forEach(l=>{likeCountMap[l.post_id]=(likeCountMap[l.post_id]||0)+1;if(state.user&&l.user_id===state.user.id)myLikedSet.add(l.post_id)});
     myBookmarkedSet=new Set((bm.data||[]).map(b=>b.post_id));
@@ -1017,7 +1023,7 @@
   }
 
   function renderProfile(){
-    const p=state.user||{}; $(".profile-name").textContent=p.nickname||"ccmmhh의 블로그";$(".profile-bio").textContent=p.bio||"제품과 공간, 일상의 결을 조용히 기록합니다.";$("#profileIntro").textContent=p.bio||"조용한 기록을 남깁니다.";
+    const p=state.user||{}; $(".profile-name").textContent=p.nickname||siteName;$(".profile-bio").textContent=p.bio||"제품과 공간, 일상의 결을 조용히 기록합니다.";$("#profileIntro").textContent=p.bio||"조용한 기록을 남깁니다.";
     const av=$(".profile-card .avatar"); if(p.avatar_url){av.style.backgroundImage=`url("${esc(p.avatar_url)}")`;av.style.backgroundSize="cover";av.style.backgroundPosition="center"}else{av.style.backgroundImage="";av.style.background="radial-gradient(circle at 35% 30%, var(--ink-200), var(--ink-600) 75%)"}
     $("#visitorStat").textContent=Number(visitorCount).toLocaleString();$("#postStat").textContent=posts.length.toLocaleString();$("#likeStat").textContent=posts.reduce((n,p)=>n+(p.likes_count||0),0).toLocaleString();
   }
@@ -1059,6 +1065,15 @@
   $("#commentForm").onsubmit=async e=>{e.preventDefault();if(!state.user){toast("댓글을 작성하려면 먼저 로그인하세요.","error");openAuth("login");return}const input=$("#commentInput"),text=input.value.trim();if(!text)return;const {error}=await sb.from("comments").insert({post_id:state.openId,user_id:state.user.id,content:text});if(error){console.error(error);toast("댓글 저장에 실패했습니다.","error");return}input.value="";await loadAll();await openPost(state.openId);toast("댓글이 등록되었습니다.","success")}
 
   async function toggleLike(id){if(!state.user){toast("공감하려면 로그인하세요.","error");openAuth("login");return}const {data}=await sb.from("likes").select("post_id").eq("post_id",id).eq("user_id",state.user.id).maybeSingle();let error;if(data)({error}=await sb.from("likes").delete().eq("post_id",id).eq("user_id",state.user.id));else({error}=await sb.from("likes").insert({post_id:id,user_id:state.user.id}));if(error){console.error(error);toast("공감 처리에 실패했습니다.","error");return}await loadAll();if(state.openId===id)openPost(id)}
+  function applySiteSettings(){
+    siteName=siteSettings.site_name||"By ccmmhh";
+    siteTags=(siteSettings.site_tags&&siteSettings.site_tags.length)?siteSettings.site_tags:["미니멀","일상","나무","조명","아침","종이","여백","도구"];
+    document.title=siteName+" — 개인 블로그";
+    const brandSpan=$(".brand span");if(brandSpan)brandSpan.textContent=siteName;
+    const vn=$("#visitorNote");if(vn)vn.textContent=`오늘도 ${siteName}에 방문해 주셔서 감사합니다.`;
+    const footer=$(".site-footer");if(footer)footer.textContent=`© 2026 ${siteName}. 조용한 기록을 남깁니다.`;
+    const tc=$("#tagCloud");if(tc)tc.innerHTML=siteTags.map(t=>`<a href="#" data-tag="${esc(t)}">#${esc(t)}</a>`).join("");
+  }
   function applyBgm(){
     const audio=$("#bgmAudio"),btn=$("#bgmToggle"),url=siteSettings.bgm_url||"";
     if(!url){btn.style.display="none";if(!audio.paused)audio.pause();audio.removeAttribute("src");return}
@@ -1132,7 +1147,22 @@
 
   function renderBgmAdmin(){
     const url=siteSettings.bgm_url||"";
-    $("#adminBgm").innerHTML=`<div class="bgm-admin-row"><label>배경음악 파일 업로드 (mp3, m4a 등)</label><input type="file" id="bgmFileInput" accept="audio/*"><div class="bgm-now">${url?"현재 설정된 곡: "+esc(url):"설정된 배경음악이 없습니다. 파일을 올리면 모든 방문자에게 재생 버튼이 나타납니다."}</div><div class="form-actions" style="justify-content:flex-start"><button class="outline-btn" id="bgmRemoveBtn" ${url?"":"disabled"}>배경음악 삭제</button></div></div>`;
+    $("#adminBgm").innerHTML=`
+      <div class="bgm-admin-row"><label>사이트 이름</label><input type="text" id="siteNameInput" value="${esc(siteName)}" placeholder="By ccmmhh"><div class="form-actions" style="justify-content:flex-start"><button class="outline-btn" id="siteNameSaveBtn">이름 저장</button></div></div>
+      <div class="bgm-admin-row"><label>사이트 태그 (쉼표로 구분)</label><input type="text" id="siteTagsInput" value="${esc(siteTags.join(', '))}" placeholder="미니멀, 일상, 나무"><div class="form-actions" style="justify-content:flex-start"><button class="outline-btn" id="siteTagsSaveBtn">태그 저장</button></div></div>
+      <div class="bgm-admin-row"><label>배경음악 파일 업로드 (mp3, m4a 등)</label><input type="file" id="bgmFileInput" accept="audio/*"><div class="bgm-now">${url?"현재 설정된 곡: "+esc(url):"설정된 배경음악이 없습니다. 파일을 올리면 모든 방문자에게 재생 버튼이 나타납니다."}</div><div class="form-actions" style="justify-content:flex-start"><button class="outline-btn" id="bgmRemoveBtn" ${url?"":"disabled"}>배경음악 삭제</button></div></div>`;
+    $("#siteNameSaveBtn").onclick=async()=>{
+      const name=$("#siteNameInput").value.trim();if(!name)return toast("사이트 이름을 입력하세요.","error");
+      const r=await sb.from("site_settings").upsert({id:1,site_name:name});
+      if(r.error){toast(r.error.message,"error");return}
+      siteSettings.site_name=name;applySiteSettings();toast("사이트 이름이 변경되었습니다.","success")
+    };
+    $("#siteTagsSaveBtn").onclick=async()=>{
+      const tags=$("#siteTagsInput").value.split(",").map(t=>t.trim()).filter(Boolean);
+      const r=await sb.from("site_settings").upsert({id:1,site_tags:tags});
+      if(r.error){toast(r.error.message,"error");return}
+      siteSettings.site_tags=tags;applySiteSettings();toast("사이트 태그가 변경되었습니다.","success")
+    };
     $("#bgmFileInput").onchange=async e=>{
       const file=e.target.files[0];if(!file)return;
       const ext=file.name.split(".").pop().toLowerCase()||"mp3",path=`bgm/${state.user.id}/${crypto.randomUUID()}.${ext}`;
@@ -1161,7 +1191,7 @@
   async function uploadAvatar(file){if(!state.user||!file)return;const ext=file.name.split(".").pop().toLowerCase()||"jpg",path=`avatars/${state.user.id}/${crypto.randomUUID()}.${ext}`;const r=await sb.storage.from("blog-media").upload(path,file,{upsert:true,contentType:file.type});if(r.error){toast(r.error.message,"error");return}const {data}=sb.storage.from("blog-media").getPublicUrl(path);$("#profileAvatar").value=data.publicUrl;toast("프로필 이미지가 업로드되었습니다.","success")}
   $("#profileAvatar").insertAdjacentHTML("afterend",'<input id="profileAvatarFile" type="file" accept="image/*" style="margin-top:6px">');$("#profileAvatarFile").onchange=e=>uploadAvatar(e.target.files[0]);
 
-  $$(".share-btn").forEach(b=>b.onclick=async()=>{const p=posts.find(x=>x.id===state.openId),url=location.href.split("#")[0]+"#post-"+p.id;if(b.dataset.share==="link"){try{await navigator.clipboard.writeText(url);toast("게시글 링크를 복사했습니다.","success")}catch{toast("링크 복사에 실패했습니다.","error")}}else{const text=encodeURIComponent(p.title+" — ccmmhh의 블로그");const target=b.dataset.share==="x"?`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(url)}`:b.dataset.share==="fb"?`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`:"";if(target)window.open(target,"share","noopener,noreferrer,width=620,height=520");else toast("카카오 공유는 카카오 SDK 연결 후 사용할 수 있습니다.")}});
+  $$(".share-btn").forEach(b=>b.onclick=async()=>{const p=posts.find(x=>x.id===state.openId),url=location.href.split("#")[0]+"#post-"+p.id;if(b.dataset.share==="link"){try{await navigator.clipboard.writeText(url);toast("게시글 링크를 복사했습니다.","success")}catch{toast("링크 복사에 실패했습니다.","error")}}else{const text=encodeURIComponent(p.title+" — "+siteName);const target=b.dataset.share==="x"?`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(url)}`:b.dataset.share==="fb"?`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`:"";if(target)window.open(target,"share","noopener,noreferrer,width=620,height=520");else toast("카카오 공유는 카카오 SDK 연결 후 사용할 수 있습니다.")}});
 
   async function refreshUser(){
     if(!SUPABASE_READY)return;
