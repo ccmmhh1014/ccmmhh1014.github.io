@@ -1050,7 +1050,7 @@
     $("#modalCat").textContent=p.catLabel;$("#modalHero").style.background=p.cover_image_url?`url("${esc(p.cover_image_url)}")`:p.tone;$("#modalHero").style.backgroundSize="cover";$("#modalHero").style.backgroundPosition="center";$("#modalTitle").textContent=p.title;$("#modalMeta").innerHTML=`<span>${fmtDate(p.published_at)}</span><span>조회 ${(p.views||0).toLocaleString()}</span><span>댓글 ${getComments(id).length}</span>`;$("#modalLikeCount").textContent=p.likes_count||0;$("#modalLikeBtn").classList.toggle("active",!!p.isLiked);$("#modalLikeBtn").innerHTML=`${p.isLiked?"♥":"♡"} 공감 <span id="modalLikeCount">${p.likes_count||0}</span>`;$("#modalBookmarkBtn").classList.toggle("active",!!p.isBookmarked);$("#modalBookmarkBtn").innerHTML=`${p.isBookmarked?"★":"☆"} 북마크`;$("#modalTags").innerHTML=(p.tags||[]).map(t=>`<button class="tag-pill" data-tag="${esc(t)}">#${esc(t)}</button>`).join("");$("#modalBody").innerHTML=(p.body||[]).map(x=>`<p>${esc(x)}</p>`).join("");
     renderComments(id);$("#modalOverlay").classList.add("open");document.body.classList.add("modal-lock");renderFeed();renderProfile()
   }
-  function closePost(){$("#modalOverlay").classList.remove("open");document.body.classList.remove("modal-lock")}
+  function closePost(){$("#modalOverlay").classList.remove("open");document.body.classList.remove("modal-lock");state.openId=null}
   $("#modalClose").onclick=closePost;$("#modalOverlay").onclick=e=>{if(e.target.id==="modalOverlay")closePost()};
   $("#prevPost").onclick=()=>navigatePost(-1);$("#nextPost").onclick=()=>navigatePost(1);
   function navigatePost(dir){const list=filteredPosts(),i=list.findIndex(p=>p.id===state.openId);if(list[i+dir])openPost(list[i+dir].id)}
