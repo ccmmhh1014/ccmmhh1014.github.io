@@ -607,12 +607,7 @@
   <div class="toast-stack" id="toastStack" aria-live="polite"></div>
 
   <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
-    <a href="#" data-mobile-cat="all">전체 글</a>
-    <a href="#" data-mobile-cat="object">사물</a>
-    <a href="#" data-mobile-cat="space">공간</a>
-    <a href="#" data-mobile-cat="routine">루틴</a>
-    <a href="#" data-mobile-cat="material">재료</a>
-    <a href="#" data-mobile-cat="thought">단상</a>
+    <div id="mobileCategoryLinks"></div>
     <div class="mobile-menu-divider"></div>
     <button id="mobileLoginBtn">로그인 / 회원가입</button>
     <button id="mobileMyPageBtn" style="display:none">마이페이지</button>
@@ -910,6 +905,30 @@
     $("#mobileAdminBtn").style.display=admin?"flex":"none";
     $("#profileEditBtn").textContent=u?"프로필 관리":"로그인";
   }
+
+  function renderMobileCategories(){
+    const wrap=$("#mobileCategoryLinks");
+    if(!wrap)return;
+    const items=[
+      {id:"all",name:"전체 글",count:posts.length},
+      ...categories.map(c=>({
+        id:c.id,
+        name:c.name,
+        count:posts.filter(p=>p.category_id===c.id).length
+      }))
+    ];
+    wrap.innerHTML=items.map(item=>`<a href="#" data-mobile-cat="${esc(item.id)}" class="${state.cat===item.id?"active":""}">${esc(item.name)} <span class="count">${item.count}</span></a>`).join("");
+    $$("[data-mobile-cat]",wrap).forEach(b=>b.onclick=e=>{
+      e.preventDefault();
+      state.cat=b.dataset.mobileCat;
+      state.page=1;
+      state.search="";
+      $("#searchInput").value="";
+      setActiveCats();
+      renderFeed();
+      closeMobileMenu();
+    });
+  }
   function isAdmin(){return !!state.user?.is_admin}
 
   async function requireReady(){if(!SUPABASE_READY){toast("Supabase 설정이 필요합니다. HTML 상단의 URL과 publishable key를 입력하세요.","error");return false}return true}
@@ -967,7 +986,16 @@
     if(state.user)state.user=await loadProfile(state.user.id)||state.user;
     renderAll();
   }
-  function renderAll(){renderCategories();renderRecent();renderFeed();renderProfile();setupUserUI();fillCategorySelect();if(isAdmin())renderAdmin()}
+  function renderAll(){
+    renderCategories();
+    renderMobileCategories();
+    renderRecent();
+    renderFeed();
+    renderProfile();
+    setupUserUI();
+    fillCategorySelect();
+    if(isAdmin())renderAdmin();
+  }
 
   function renderProfile(){
     const p=state.user||{}; $(".profile-name").textContent=p.nickname||"잔여백";$(".profile-bio").textContent=p.bio||"제품과 공간, 일상의 결을 조용히 기록합니다.";$("#profileIntro").textContent=p.bio||"조용한 기록을 남깁니다.";
@@ -978,7 +1006,7 @@
   function filteredPosts(){let list=state.cat==="all"?posts.slice():posts.filter(p=>p.category_id===state.cat);if(state.search){const q=state.search.toLowerCase();list=list.filter(p=>(p.title+" "+(p.excerpt||"")+" "+(p.tags||[]).join(" ")).toLowerCase().includes(q))}if(state.sort==="popular")list.sort((a,b)=>(b.views||0)-(a.views||0));else if(state.sort==="likes")list.sort((a,b)=>(b.likes_count||0)-(a.likes_count||0));return list}
   function renderCategories(){
     const all=posts.length;$(".category-list").innerHTML=`<li><a href="#" class="${state.cat==="all"?"active":""}" data-cat="all">전체 글 <span class="count">${all}</span></a></li>`+categories.map(c=>`<li><a href="#" class="${state.cat===c.id?"active":""}" data-cat="${esc(c.id)}">${esc(c.name)} <span class="count">${posts.filter(p=>p.category_id===c.id).length}</span></a></li>`).join("");
-    $$("[data-cat]").forEach(a=>a.onclick=catClick);$$('[data-mobile-cat]').forEach(b=>b.onclick=e=>{e.preventDefault();state.cat=b.dataset.mobileCat;state.page=1;state.search="";$("#searchInput").value="";setActiveCats();renderFeed();closeMobileMenu()});setActiveCats()
+    $$("[data-cat]").forEach(a=>a.onclick=catClick);setActiveCats()
   }
   function catClick(e){e.preventDefault();state.cat=this.dataset.cat;state.page=1;state.search="";$("#searchInput").value="";setActiveCats();renderFeed();closeMobileMenu()}
   function setActiveCats(){$$(".primary-nav [data-cat],.category-list [data-cat]").forEach(a=>a.classList.toggle("active",a.dataset.cat===state.cat))}
@@ -1018,7 +1046,33 @@
 
   const searchOverlay=$("#searchOverlay");function openSearch(){searchOverlay.classList.add("open");setTimeout(()=>$("#searchInput").focus(),50)}function closeSearch(){searchOverlay.classList.remove("open")};$("#searchBtn").onclick=openSearch;searchOverlay.onclick=e=>{if(e.target===searchOverlay)closeSearch()};$("#searchInput").oninput=e=>{state.search=e.target.value.trim();state.page=1;renderFeed()};
   $$('[data-sort]').forEach(b=>b.onclick=()=>{$$('[data-sort]').forEach(x=>x.classList.remove("active"));b.classList.add("active");state.sort=b.dataset.sort;state.page=1;renderFeed()});
-  function closeMobileMenu(){$("#mobileMenu").classList.remove("open")};$("#menuBtn").onclick=()=>$("#mobileMenu").classList.toggle("open");
+  function closeMobileMenu(){
+    const menu=$("#mobileMenu");
+    const backdrop=$("#mobileBackdrop");
+    if(menu){
+      menu.classList.remove("open");
+      menu.setAttribute("aria-hidden","true");
+    }
+    if(backdrop)backdrop.classList.remove("open");
+  }
+  function openMobileMenu(){
+    const menu=$("#mobileMenu");
+    const backdrop=$("#mobileBackdrop");
+    if(menu){
+      menu.classList.add("open");
+      menu.setAttribute("aria-hidden","false");
+    }
+    if(backdrop)backdrop.classList.add("open");
+  }
+  $("#menuBtn").onclick=()=>$("#mobileMenu").classList.contains("open")?closeMobileMenu():openMobileMenu();
+  $("#mobileBackdrop").onclick=closeMobileMenu;
+
+  // 모바일 메뉴의 계정 관련 버튼은 렌더링 시 display만 바꾸고
+  // 클릭 이벤트가 누락되어 있던 문제를 수정합니다.
+  $("#mobileLoginBtn").onclick=()=>{closeMobileMenu();openAuth("login")};
+  $("#mobileMyPageBtn").onclick=()=>{closeMobileMenu();openMyPage()};
+  $("#mobileAdminBtn").onclick=()=>{closeMobileMenu();openAdmin()};
+  document.addEventListener("keydown",e=>{if(e.key==="Escape")closeMobileMenu()});
 
   function openAuth(mode="login"){authMode=mode;$("#authTitle").textContent=mode==="login"?"로그인":"회원가입";$("#authSubmit").textContent=mode==="login"?"로그인":"회원가입";$("#authNicknameField").style.display=mode==="login"?"none":"block";$("#authSwitchText").textContent=mode==="login"?"계정이 없나요?":"이미 계정이 있나요?";$("#authSwitch").textContent=mode==="login"?"회원가입":"로그인";$("#authForm").reset();$("#authId").type="email";$("#authId").placeholder="이메일 주소";openModal("authModal")}
   $("#loginQuickBtn").onclick=()=>openAuth();$("#authSwitch").onclick=()=>openAuth(authMode==="login"?"register":"login");
