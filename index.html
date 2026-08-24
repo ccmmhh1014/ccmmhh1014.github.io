@@ -244,6 +244,21 @@
   }
   .tag-cloud a:hover{ background:var(--text-primary); color:var(--bg); border-color:var(--text-primary); }
 
+  /* Keep the profile framed; let secondary navigation breathe. */
+  aside.sidebar>.card:not(.profile-card){
+    padding:2px 0 24px;
+    background:transparent;
+    border:0!important;
+    border-radius:0;
+    box-shadow:none;
+  }
+  aside.sidebar>.card:not(.profile-card)+.card:not(.profile-card){border-top:0;padding-top:0;margin-top:22px;}
+  aside.sidebar>.card:not(.profile-card):not(:last-child){border-bottom:1px solid var(--border)!important;}
+  .page-wrap{animation:pageEnter .58s var(--ease) both;}
+  .site-hero.show{animation:heroEnter .62s var(--ease) both;}
+  @keyframes pageEnter{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes heroEnter{from{opacity:0;transform:translateY(-8px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
+
   /* ===== Main feed ===== */
   main.feed{ min-width:0; }
   .feed-header{
@@ -252,6 +267,24 @@
   }
   .feed-header h1{ font-size:26px; font-weight:800; margin:0; letter-spacing:-0.02em; }
   .feed-header .feed-sub{ font-size:13px; color:var(--text-tertiary); }
+
+  .site-hero{
+    display:none;
+    position:relative;
+    width:min(1180px,calc(100% - 56px));
+    height:clamp(180px,24vw,286px);
+    margin:calc(var(--header-h) + 24px) auto 0;
+    overflow:hidden;
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    background:var(--surface) center/cover no-repeat;
+    box-shadow:var(--shadow-sm);
+  }
+  .site-hero.show{display:flex;align-items:flex-end;}
+  .site-hero::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.28);pointer-events:none;}
+  .site-hero-content{position:relative;z-index:1;padding:28px 32px;color:#fff;text-shadow:0 1px 12px rgba(0,0,0,.45);}
+  .site-hero-content strong{display:block;font-size:clamp(20px,3vw,32px);font-weight:800;line-height:1.25;}
+  .site-hero-content span{display:block;margin-top:7px;font-size:13px;opacity:.9;}
 
   .post-list{ display:flex; flex-direction:column; gap:16px; }
 
@@ -427,9 +460,10 @@
     display:flex; flex-direction:column; gap:4px;
   }
   .pn-btn:hover{ background:var(--bg-elevated); box-shadow:var(--shadow-sm); }
+  .pn-btn:disabled{opacity:.42;cursor:not-allowed;transform:none;box-shadow:none;}
   .pn-btn.next{ text-align:right; align-items:flex-end; }
   .pn-label{ font-size:11px; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.05em; }
-  .pn-title{ font-size:13.5px; font-weight:600; }
+  .pn-title{ font-size:13.5px; font-weight:700; color:var(--text-primary); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
   .comments{ padding:8px 0 24px; }
   .comments h4{ font-size:15px; font-weight:700; margin-bottom:14px; }
@@ -499,6 +533,8 @@
   }
   @media (max-width:520px){
     header.site-header{ padding:0 16px; }
+    .site-hero{width:calc(100% - 32px);height:190px;margin-top:calc(var(--header-h) + 16px);border-radius:var(--radius-md);}
+    .site-hero-content{padding:22px 20px;}
     .page-wrap{ padding-left:16px; padding-right:16px; }
     .post-card{ grid-template-columns:1fr; }
     .thumb{ aspect-ratio:16/9; }
@@ -646,6 +682,22 @@
   .mobile-menu a:hover,.mobile-menu button:hover{background:var(--surface);}
   .mobile-menu-divider{height:1px;background:var(--border);margin:5px 0;}
 
+  /* Fast, calm interaction feedback */
+  button,.post-card,.tag-pill,.mobile-menu a{transition-timing-function:cubic-bezier(.2,.8,.2,1);}
+  button:active,.tag-pill:active,.mobile-menu a:active{transform:scale(.97);}
+  .quick-btn:active,.sort-btn:active,.outline-btn:active,.primary-btn:active,.danger-btn:active{transform:scale(.96);}
+  .app-modal-wrap{display:flex;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s ease,visibility 0s linear .22s;}
+  .app-modal-wrap.open{display:flex;opacity:1;visibility:visible;pointer-events:auto;transition-delay:0s;}
+  .app-modal-wrap .app-modal{transform:translateY(10px) scale(.985);opacity:0;transition:transform .28s var(--ease),opacity .2s ease;animation:none;}
+  .app-modal-wrap.open .app-modal{transform:translateY(0) scale(1);opacity:1;}
+  .app-modal-wrap.closing .app-modal{transform:translateY(6px) scale(.99);opacity:0;}
+  .toast.removing{animation:toastOut .2s ease forwards;}
+  @keyframes toastOut{to{opacity:0;transform:translateY(6px);}}
+  .modal-overlay{display:flex;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s ease,visibility 0s linear .22s;}
+  .modal-overlay.open{display:flex;opacity:1;visibility:visible;pointer-events:auto;transition-delay:0s;}
+  .modal-overlay .post-modal{transform:translateY(12px) scale(.985);opacity:0;transition:transform .3s var(--ease),opacity .2s ease;animation:none;}
+  .modal-overlay.open .post-modal{transform:translateY(0) scale(1);opacity:1;}
+
   @media (max-width:920px){
     .user-chip{display:none!important;}
     .form-grid{grid-template-columns:1fr;}
@@ -718,6 +770,13 @@
 
 <div class="mobile-sidebar-backdrop" id="mobileBackdrop"></div>
 
+<section class="site-hero" id="siteHero" aria-label="사이트 대문 이미지">
+  <div class="site-hero-content">
+    <strong id="siteHeroTitle">By ccmmhh</strong>
+    <span id="siteHeroText">조용한 기록을 남깁니다.</span>
+  </div>
+</section>
+
 <div class="page-wrap">
 
   <aside class="sidebar" id="sidebar">
@@ -786,7 +845,7 @@
     <div class="modal-top">
       <span class="m-cat" id="modalCat">사물</span>
       <div class="modal-top-actions">
-        <button class="modal-post-action" id="modalEditPostBtn" type="button" style="display:none">수정</button>
+        <button class="modal-post-action edit" id="modalEditPostBtn" type="button" style="display:none">수정</button>
         <button class="modal-post-action danger" id="modalDeletePostBtn" type="button" style="display:none">삭제</button>
         <button class="modal-close" id="modalClose" aria-label="닫기">✕</button>
       </div>
@@ -812,11 +871,11 @@
       </div>
 
       <div class="prevnext">
-        <button class="pn-btn prev" id="prevPost">
+        <button class="pn-btn prev" id="prevPost" type="button">
           <span class="pn-label">← 이전 글</span>
           <span class="pn-title" id="prevTitle">—</span>
         </button>
-        <button class="pn-btn next" id="nextPost">
+        <button class="pn-btn next" id="nextPost" type="button">
           <span class="pn-label">다음 글 →</span>
           <span class="pn-title" id="nextTitle">—</span>
         </button>
@@ -974,9 +1033,9 @@
   const eyeSvg=()=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>`;
   const bubbleSvg=()=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1-2-2h14a2 2 0 0 1 2 2z"/></svg>`;
 
-  function toast(msg,type=""){const e=document.createElement("div");e.className=`toast ${type}`;e.textContent=msg;$("#toastStack").appendChild(e);setTimeout(()=>e.remove(),3200)}
-  function openModal(id){const e=$("#"+id);if(!e)return;e.classList.add("open");e.setAttribute("aria-hidden","false")}
-  function closeModal(id){const e=$("#"+id);if(!e)return;e.classList.remove("open");e.setAttribute("aria-hidden","true")}
+  function toast(msg,type=""){const e=document.createElement("div");e.className=`toast ${type}`;e.textContent=msg;$("#toastStack").appendChild(e);setTimeout(()=>{e.classList.add("removing");setTimeout(()=>e.remove(),200)},3200)}
+  function openModal(id){const e=$("#"+id);if(!e)return;clearTimeout(e.closeTimer);e.classList.remove("closing");e.classList.add("open");e.setAttribute("aria-hidden","false")}
+  function closeModal(id){const e=$("#"+id);if(!e)return;e.classList.remove("open");e.classList.add("closing");e.setAttribute("aria-hidden","true");clearTimeout(e.closeTimer);e.closeTimer=setTimeout(()=>e.classList.remove("closing"),240)}
   $$('[data-close-modal]').forEach(b=>b.onclick=()=>closeModal(b.dataset.closeModal));
   $$('.app-modal-wrap').forEach(m=>m.onclick=e=>{if(e.target===m)closeModal(m.id)});
   function confirmAction(message,cb){$("#confirmMessage").textContent=message;pendingConfirm=cb;openModal("confirmModal")}
@@ -1058,7 +1117,7 @@
     }
     return created;
   }
-  async function loadAll(){
+  async function loadAll(keepFeedVisible=false){
     if(!await requireReady())return;
     const [pc,cc,ct,dr,lk,bm,ss]=await Promise.all([
       sb.from("posts").select("*,categories(id,name)").eq("status","published").order("published_at",{ascending:false}),
@@ -1078,13 +1137,13 @@
     posts=(pc.data||[]).map(p=>({...p,cat:p.category_id,catLabel:p.categories?.name||"기타",tags:p.tags||[],body:p.content_blocks||[],media:p.media||[],tone:p.cover_image_url?"var(--surface)":"linear-gradient(135deg,#dedee2,#666)",likes_count:likeCountMap[p.id]||0,isLiked:myLikedSet.has(p.id),isBookmarked:myBookmarkedSet.has(p.id)}));
     comments=cc.data||[]; categories=ct.data||[]; drafts=dr.data||[];
     if(state.user)state.user=await loadProfile(state.user.id)||state.user;
-    renderAll();
+    renderAll(keepFeedVisible);
   }
-  function renderAll(){
+  function renderAll(keepFeedVisible=false){
     renderCategories();
     renderMobileCategories();
     renderRecent();
-    renderFeed();
+    renderFeed(!keepFeedVisible);
     renderProfile();
     setupUserUI();
     fillCategorySelect();
@@ -1134,33 +1193,47 @@
   }
   function thumbHTML(p){const media=p.media||[];const locked=p.is_private&&!state.user;const coverImg=p.cover_image_url||media.find(m=>m.type==="image")?.url;const lockOverlay=locked?'<div class="thumb-lock-overlay"><span class="thumb-lock-icon">🔒</span></div>':"";if(coverImg)return `<div class="thumb"><div class="thumb-bg${locked?" thumb-locked":""}" style="background-image:url('${esc(coverImg)}')"></div>${lockOverlay}${media.length>1&&!locked?'<span class="thumb-count">'+media.length+'장</span>':''}<span class="thumb-glyph">${esc(p.catLabel)}</span></div>`;const firstVideo=media.find(m=>m.type==="video");if(firstVideo)return `<div class="thumb"><video class="${locked?"thumb-locked":""}" src="${esc(firstVideo.url)}" muted preload="metadata" style="width:100%;height:100%;object-fit:cover"></video>${lockOverlay}<span class="thumb-glyph">${esc(p.catLabel)}</span></div>`;return `<div class="thumb" style="--tone:${p.tone}">${lockOverlay}<span class="thumb-glyph">${esc(p.catLabel)}</span></div>`}
 
-  function renderFeed(){
+  function renderFeed(animate=true){
     const list=filteredPosts(),total=Math.max(1,Math.ceil(list.length/state.perPage));if(state.page>total)state.page=total;const page=list.slice((state.page-1)*state.perPage,state.page*state.perPage);
     $("#feedTitle").textContent=state.search?`검색 결과: ${state.search}`:(state.cat==="all"?"전체 글":(categories.find(c=>c.id===state.cat)?.name||"전체 글"));$("#feedCount").textContent=`${list.length}개의 글`;
     $("#postList").innerHTML=page.length?page.map(p=>`<article class="post-card" data-open="${p.id}" tabindex="0" role="button"><div>${thumbHTML(p)}</div><div class="post-body"><div class="post-cat">${esc(p.catLabel)}${p.is_private?' <span class="private-badge">🔒 비공개</span>':""}</div><h2 class="post-title">${esc(p.title)}</h2><p class="post-excerpt">${esc(p.excerpt||"")}</p><div class="post-meta"><span>${fmtDate(p.published_at)}</span><span>${eyeSvg()} ${(p.views||0).toLocaleString()}</span><span>${bubbleSvg()} ${getComments(p.id).length}</span></div><div class="post-actions"><button class="post-action${p.isLiked?" active":""}" data-like="${p.id}" type="button">${p.isLiked?"♥":"♡"} 공감 ${p.likes_count||0}</button><button class="post-action${p.isBookmarked?" active":""}" data-bookmark="${p.id}" type="button">${p.isBookmarked?"★":"☆"} 북마크</button></div></div></article>`).join(""):`<div class="empty-state"><strong>아직 글이 없습니다.</strong><span>다른 카테고리나 검색어를 확인해 주세요.</span></div>`;
-    renderPagination(total);observeCards()
+    renderPagination(total);observeCards(animate)
   }
   function renderPagination(total){const el=$("#pagination");if(total<=1){el.innerHTML="";return}let h=`<button class="page-btn" data-page="prev" ${state.page===1?"disabled":""}>‹</button>`;for(let i=1;i<=total;i++)h+=`<button class="page-btn ${i===state.page?"active":""}" data-page="${i}">${i}</button>`;h+=`<button class="page-btn" data-page="next" ${state.page===total?"disabled":""}>›</button>`;el.innerHTML=h}
   $("#pagination").onclick=e=>{const b=e.target.closest(".page-btn");if(!b||b.disabled)return;if(b.dataset.page==="prev")state.page--;else if(b.dataset.page==="next")state.page++;else state.page=+b.dataset.page;renderFeed();scrollTo({top:0,behavior:"smooth"})}
-  let observer;function observeCards(){if(observer)observer.disconnect();if(!("IntersectionObserver"in window)){$$(".post-card").forEach(c=>c.classList.add("in-view"));return}observer=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){x.target.classList.add("in-view");observer.unobserve(x.target)}}),{threshold:.08});$$(".post-card").forEach(c=>observer.observe(c))}
+  let observer;function observeCards(animate=true){if(observer)observer.disconnect();if(!animate||!("IntersectionObserver"in window)){$$(".post-card").forEach(c=>c.classList.add("in-view"));return}observer=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){x.target.classList.add("in-view");observer.unobserve(x.target)}}),{threshold:.08});$$(".post-card").forEach(c=>observer.observe(c))}
 
   async function openPost(id){
     const p=posts.find(x=>x.id===id);if(!p)return;
     if(p.is_private&&!state.user){toast("로그인이 필요한 비공개 게시물입니다.","error");openAuth("login");return}
+    const shouldCountView=state.openId!==id;
     state.openId=id;
+    updatePrevNext();
     const canManage=isAdmin();
     $("#modalEditPostBtn").style.display=canManage?"":"none";
     $("#modalDeletePostBtn").style.display=canManage?"":"none";
-    await sb.from("posts").update({views:(p.views||0)+1}).eq("id",id);p.views=(p.views||0)+1;
+    if(shouldCountView){await sb.from("posts").update({views:(p.views||0)+1}).eq("id",id);p.views=(p.views||0)+1;}
     $("#modalCat").textContent=p.catLabel;renderGallery(p);$("#modalTitle").textContent=p.title;$("#modalMeta").innerHTML=`<span>${fmtDate(p.published_at)}</span><span>조회 ${(p.views||0).toLocaleString()}</span><span>댓글 ${getComments(id).length}</span>`;$("#modalLikeCount").textContent=p.likes_count||0;$("#modalLikeBtn").classList.toggle("active",!!p.isLiked);$("#modalLikeBtn").innerHTML=`${p.isLiked?"♥":"♡"} 공감 <span id="modalLikeCount">${p.likes_count||0}</span>`;$("#modalBookmarkBtn").classList.toggle("active",!!p.isBookmarked);$("#modalBookmarkBtn").innerHTML=`${p.isBookmarked?"★":"☆"} 북마크`;$("#modalTags").innerHTML=(p.tags||[]).map(t=>`<button class="tag-pill" data-tag="${esc(t)}">#${esc(t)}</button>`).join("");$("#modalBody").innerHTML=(p.body||[]).map(x=>`<p>${esc(x)}</p>`).join("");
-    renderComments(id);$("#modalOverlay").classList.add("open");document.body.classList.add("modal-lock");renderFeed();renderProfile()
+    renderComments(id);clearTimeout($("#modalOverlay").closeTimer);$("#modalOverlay").classList.remove("closing");$("#modalOverlay").classList.add("open");document.body.classList.add("modal-lock");renderFeed();renderProfile()
   }
-  function closePost(){$("#modalOverlay").classList.remove("open");document.body.classList.remove("modal-lock");state.openId=null}
+  function closePost(){const overlay=$("#modalOverlay");overlay.classList.remove("open");overlay.classList.add("closing");clearTimeout(overlay.closeTimer);overlay.closeTimer=setTimeout(()=>overlay.classList.remove("closing"),240);document.body.classList.remove("modal-lock");state.openId=null}
   $("#modalClose").onclick=closePost;$("#modalOverlay").onclick=e=>{if(e.target.id==="modalOverlay")closePost()};
   $("#modalEditPostBtn").onclick=()=>{const p=posts.find(x=>x.id===state.openId);if(!p)return;closePost();openEditor(p)};
   $("#modalDeletePostBtn").onclick=()=>{const id=state.openId;if(id)deletePost(id)};
-  $("#prevPost").onclick=()=>navigatePost(-1);$("#nextPost").onclick=()=>navigatePost(1);
-  function navigatePost(dir){const list=filteredPosts(),i=list.findIndex(p=>p.id===state.openId);if(list[i+dir])openPost(list[i+dir].id)}
+  $("#prevPost").onclick=e=>{e.preventDefault();e.stopPropagation();navigatePost(-1)};
+  $("#nextPost").onclick=e=>{e.preventDefault();e.stopPropagation();navigatePost(1)};
+  function updatePrevNext(){
+    const list=filteredPosts(),index=list.findIndex(p=>p.id===state.openId),prev=list[index+1],next=list[index-1];
+    $("#prevTitle").textContent=prev?.title||"이전 글이 없습니다";
+    $("#nextTitle").textContent=next?.title||"다음 글이 없습니다";
+    $("#prevPost").disabled=!prev;
+    $("#nextPost").disabled=!next;
+  }
+  function navigatePost(dir){
+    const list=filteredPosts(),index=list.findIndex(p=>p.id===state.openId);
+    const target=dir<0?list[index+1]:list[index-1];
+    if(target)openPost(target.id);
+  }
 
   function commentHTML(c,isReply){
     const mine=state.user&&c.user_id===state.user.id;
@@ -1220,13 +1293,14 @@
   }
   $("#commentForm").onsubmit=async e=>{e.preventDefault();if(!state.user){toast("댓글을 작성하려면 먼저 로그인하세요.","error");openAuth("login");return}const input=$("#commentInput"),text=input.value.trim();if(!text)return;const {error}=await sb.from("comments").insert({post_id:state.openId,user_id:state.user.id,content:text});if(error){console.error(error);toast("댓글 저장에 실패했습니다.","error");return}input.value="";await loadAll();await openPost(state.openId);toast("댓글이 등록되었습니다.","success")}
 
-  async function toggleLike(id){if(!state.user){toast("공감하려면 로그인하세요.","error");openAuth("login");return}const {data}=await sb.from("likes").select("post_id").eq("post_id",id).eq("user_id",state.user.id).maybeSingle();let error;if(data)({error}=await sb.from("likes").delete().eq("post_id",id).eq("user_id",state.user.id));else({error}=await sb.from("likes").insert({post_id:id,user_id:state.user.id}));if(error){console.error(error);toast("공감 처리에 실패했습니다.","error");return}await loadAll();if(state.openId===id)openPost(id)}
+  async function toggleLike(id){if(!state.user){toast("공감하려면 로그인하세요.","error");openAuth("login");return}const {data}=await sb.from("likes").select("post_id").eq("post_id",id).eq("user_id",state.user.id).maybeSingle();let error;if(data)({error}=await sb.from("likes").delete().eq("post_id",id).eq("user_id",state.user.id));else({error}=await sb.from("likes").insert({post_id:id,user_id:state.user.id}));if(error){console.error(error);toast("공감 처리에 실패했습니다.","error");return}await loadAll(true);if(state.openId===id)openPost(id)}
   function applySiteSettings(){
     siteName=siteSettings.site_name||"By ccmmhh";
     siteTags=(siteSettings.site_tags&&siteSettings.site_tags.length)?siteSettings.site_tags:["미니멀","일상","나무","조명","아침","종이","여백","도구"];
     document.title=siteName+" — 개인 블로그";
     const brandSpan=$(".brand span");if(brandSpan)brandSpan.textContent=siteName;
     const mark=$("#brandMark");if(mark){if(siteSettings.logo_url){mark.style.backgroundImage=`url("${siteSettings.logo_url}")`;mark.style.backgroundSize="cover";mark.style.backgroundPosition="center"}else{mark.style.backgroundImage="";mark.style.backgroundSize="";mark.style.backgroundPosition=""}}
+    const hero=$("#siteHero");if(hero){const heroUrl=siteSettings.hero_image_url||"";hero.style.backgroundImage=heroUrl?`url("${heroUrl}")`:"none";hero.classList.toggle("show",!!heroUrl);$("#siteHeroTitle").textContent=siteName;$("#siteHeroText").textContent=siteSettings.hero_text||"조용한 기록을 남깁니다."}
     const vn=$("#visitorNote");if(vn)vn.textContent=`오늘도 ${siteName}에 방문해 주셔서 감사합니다.`;
     const footer=$(".site-footer");if(footer)footer.textContent=`© 2026 ${siteName}. 조용한 기록을 남깁니다.`;
     const tc=$("#tagCloud");if(tc)tc.innerHTML=siteTags.map(t=>`<a href="#" data-tag="${esc(t)}">#${esc(t)}</a>`).join("");
@@ -1250,7 +1324,7 @@
   });
   window.addEventListener("pagehide",()=>{const audio=$("#bgmAudio");if(!audio.paused)audio.pause()});
 
-  async function toggleBookmark(id){if(!state.user){toast("북마크하려면 로그인하세요.","error");openAuth("login");return}const {data}=await sb.from("bookmarks").select("post_id").eq("post_id",id).eq("user_id",state.user.id).maybeSingle();const r=data?await sb.from("bookmarks").delete().eq("post_id",id).eq("user_id",state.user.id):await sb.from("bookmarks").insert({post_id:id,user_id:state.user.id});if(r.error){console.error(r.error);toast("북마크 처리에 실패했습니다.","error");return}toast(data?"북마크에서 제거했습니다.":"북마크에 저장했습니다.",data?"":"success");await loadAll();if(state.openId===id)openPost(id)}
+  async function toggleBookmark(id){if(!state.user){toast("북마크하려면 로그인하세요.","error");openAuth("login");return}const {data}=await sb.from("bookmarks").select("post_id").eq("post_id",id).eq("user_id",state.user.id).maybeSingle();const r=data?await sb.from("bookmarks").delete().eq("post_id",id).eq("user_id",state.user.id):await sb.from("bookmarks").insert({post_id:id,user_id:state.user.id});if(r.error){console.error(r.error);toast("북마크 처리에 실패했습니다.","error");return}toast(data?"북마크에서 제거했습니다.":"북마크에 저장했습니다.",data?"":"success");await loadAll(true);if(state.openId===id)openPost(id)}
   $("#modalLikeBtn").onclick=()=>toggleLike(state.openId);$("#modalBookmarkBtn").onclick=()=>toggleBookmark(state.openId);
 
   document.body.onclick=e=>{const op=e.target.closest("[data-open]");if(op&&!e.target.closest("button")&&!e.target.closest(".post-actions")){e.preventDefault();closeModal("myPageModal");openPost(op.dataset.open);return}const like=e.target.closest("[data-like]");if(like){e.preventDefault();e.stopPropagation();toggleLike(like.dataset.like);return}const bm=e.target.closest("[data-bookmark]");if(bm){e.preventDefault();e.stopPropagation();toggleBookmark(bm.dataset.bookmark);return}const tag=e.target.closest("[data-tag]");if(tag){e.preventDefault();state.search=tag.dataset.tag;state.page=1;$("#searchInput").value=state.search;closePost();renderFeed()}};
@@ -1331,6 +1405,8 @@
     $("#adminBgm").innerHTML=`
       <div class="bgm-admin-row"><label>사이트 이름</label><input type="text" id="siteNameInput" value="${esc(siteName)}" placeholder="By ccmmhh"><div class="form-actions" style="justify-content:flex-start"><button class="outline-btn" id="siteNameSaveBtn">이름 저장</button></div></div>
       <div class="bgm-admin-row"><label>로고 이미지</label><input type="file" id="logoFileInput" accept="image/*"><div class="bgm-now">${siteSettings.logo_url?"현재 로고가 설정되어 있습니다.":"설정된 로고가 없습니다. 이미지를 올리면 기본 도형 대신 표시됩니다."}</div><div class="form-actions" style="justify-content:flex-start"><button class="outline-btn" id="logoRemoveBtn" ${siteSettings.logo_url?"":"disabled"}>로고 삭제</button></div></div>
+      <div class="bgm-admin-row"><label>대문 이미지</label><input type="text" id="heroImageInput" value="${esc(siteSettings.hero_image_url||"")}" placeholder="이미지 URL을 입력하거나 아래에서 업로드"><input type="file" id="heroFileInput" accept="image/*"><div class="bgm-now">${siteSettings.hero_image_url?"현재 대문 이미지가 설정되어 있습니다.":"설정된 대문 이미지가 없습니다."}</div><div class="form-actions" style="justify-content:flex-start"><button class="outline-btn" id="heroImageSaveBtn">대문 이미지 저장</button><button class="outline-btn" id="heroRemoveBtn" ${siteSettings.hero_image_url?"":"disabled"}>대문 이미지 삭제</button></div></div>
+      <div class="bgm-admin-row"><label>대문 소개 문구</label><input type="text" id="heroTextInput" value="${esc(siteSettings.hero_text||"")}" placeholder="조용한 기록을 남깁니다."><div class="form-actions" style="justify-content:flex-start"><button class="outline-btn" id="heroTextSaveBtn">소개 문구 저장</button></div></div>
       <div class="bgm-admin-row"><label>사이트 태그 (쉼표로 구분)</label><input type="text" id="siteTagsInput" value="${esc(siteTags.join(', '))}" placeholder="미니멀, 일상, 나무"><div class="form-actions" style="justify-content:flex-start"><button class="outline-btn" id="siteTagsSaveBtn">태그 저장</button></div></div>
       <div class="bgm-admin-row"><label>배경음악 파일 업로드 (mp3, m4a 등)</label><input type="file" id="bgmFileInput" accept="audio/*"><div class="bgm-now">${url?"현재 설정된 곡: "+esc(url):"설정된 배경음악이 없습니다. 파일을 올리면 모든 방문자에게 재생 버튼이 나타납니다."}</div><div class="form-actions" style="justify-content:flex-start"><button class="outline-btn" id="bgmRemoveBtn" ${url?"":"disabled"}>배경음악 삭제</button></div></div>`;
     $("#siteNameSaveBtn").onclick=async()=>{
@@ -1354,6 +1430,32 @@
       if(r.error){toast(r.error.message,"error");return}
       siteSettings.logo_url=null;applySiteSettings();renderBgmAdmin();toast("로고가 삭제되었습니다.","success")
     });
+    $("#heroImageSaveBtn").onclick=async()=>{
+      const url=$("#heroImageInput").value.trim();
+      if(!url)return toast("대문 이미지 URL을 입력하세요.","error");
+      const r=await sb.from("site_settings").upsert({id:1,hero_image_url:url});
+      if(r.error){toast(r.error.message,"error");return}
+      siteSettings.hero_image_url=url;applySiteSettings();renderBgmAdmin();toast("대문 이미지가 설정되었습니다.","success")
+    };
+    $("#heroFileInput").onchange=async e=>{
+      const file=e.target.files[0];if(!file||!state.user)return;
+      const ext=file.name.split(".").pop().toLowerCase()||"jpg",path=`hero/${state.user.id}/${crypto.randomUUID()}.${ext}`;
+      const r=await sb.storage.from("blog-media").upload(path,file,{upsert:true,contentType:file.type});
+      if(r.error){toast(r.error.message,"error");return}
+      const {data}=sb.storage.from("blog-media").getPublicUrl(path);
+      $("#heroImageInput").value=data.publicUrl;toast("업로드가 완료되었습니다. 저장 버튼을 눌러 적용하세요.","success")
+    };
+    $("#heroRemoveBtn").onclick=()=>confirmAction("대문 이미지를 삭제하시겠습니까?",async()=>{
+      const r=await sb.from("site_settings").upsert({id:1,hero_image_url:null});
+      if(r.error){toast(r.error.message,"error");return}
+      siteSettings.hero_image_url=null;applySiteSettings();renderBgmAdmin();toast("대문 이미지가 삭제되었습니다.","success")
+    });
+    $("#heroTextSaveBtn").onclick=async()=>{
+      const text=$("#heroTextInput").value.trim();
+      const r=await sb.from("site_settings").upsert({id:1,hero_text:text||null});
+      if(r.error){toast(r.error.message,"error");return}
+      siteSettings.hero_text=text;applySiteSettings();renderBgmAdmin();toast("대문 소개 문구가 저장되었습니다.","success")
+    };
     $("#siteTagsSaveBtn").onclick=async()=>{
       const tags=$("#siteTagsInput").value.split(",").map(t=>t.trim()).filter(Boolean);
       const r=await sb.from("site_settings").upsert({id:1,site_tags:tags});
@@ -1474,10 +1576,7 @@
           renderAll();
           await loadAll();
 
-          if(event==="SIGNED_IN"){
-            closeModal("authModal");
-            toast("로그인되었습니다.","success");
-          }
+          if(event==="SIGNED_IN")closeModal("authModal");
         }else{
           state.user=null;
           renderAll();
