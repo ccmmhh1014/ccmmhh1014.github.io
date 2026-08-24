@@ -1151,7 +1151,7 @@
   }
 
   function renderProfile(){
-    const p=state.user||{}; $(".profile-name").textContent=p.nickname||siteName;$(".profile-bio").textContent=p.bio||"제품과 공간, 일상의 결을 조용히 기록합니다.";$("#profileIntro").textContent=p.bio||"조용한 기록을 남깁니다.";
+    const p=state.user||{}; $(".profile-name").textContent=p.nickname||siteName;$(".profile-bio").textContent=p.bio||"제품과 공간, 일상의 결을 조용히 기록합니다.";$("#profileIntro").textContent=p.bio||"하루를, 조금씩";
     const av=$(".profile-card .avatar"); if(p.avatar_url){av.style.backgroundImage=`url("${esc(p.avatar_url)}")`;av.style.backgroundSize="cover";av.style.backgroundPosition="center"}else{av.style.backgroundImage="";av.style.background=""}
     $("#visitorStatWrap").style.display=isAdmin()?"":"none";$("#visitorStat").textContent=Number(visitorCount).toLocaleString();
     $("#postStat").textContent=state.user?posts.filter(x=>x.author_id===state.user.id).length.toLocaleString():"-";
@@ -1300,9 +1300,9 @@
     document.title=siteName+" — 개인 블로그";
     const brandSpan=$(".brand span");if(brandSpan)brandSpan.textContent=siteName;
     const mark=$("#brandMark");if(mark){if(siteSettings.logo_url){mark.style.backgroundImage=`url("${siteSettings.logo_url}")`;mark.style.backgroundSize="cover";mark.style.backgroundPosition="center"}else{mark.style.backgroundImage="";mark.style.backgroundSize="";mark.style.backgroundPosition=""}}
-    const hero=$("#siteHero");if(hero){const heroUrl=siteSettings.hero_image_url||"";hero.style.backgroundImage=heroUrl?`url("${heroUrl}")`:"none";hero.classList.toggle("show",!!heroUrl);$("#siteHeroTitle").textContent=siteName;$("#siteHeroText").textContent=siteSettings.hero_text||"조용한 기록을 남깁니다."}
+    const hero=$("#siteHero");if(hero){const heroUrl=siteSettings.hero_image_url||"";hero.style.backgroundImage=heroUrl?`url("${heroUrl}")`:"none";hero.classList.toggle("show",!!heroUrl);$("#siteHeroTitle").textContent=siteName;$("#siteHeroText").textContent=siteSettings.hero_text||"하루를, 조금씩"}
     const vn=$("#visitorNote");if(vn)vn.textContent=`오늘도 ${siteName}에 방문해 주셔서 감사합니다.`;
-    const footer=$(".site-footer");if(footer)footer.textContent=`© 2026 ${siteName}. 조용한 기록을 남깁니다.`;
+    const footer=$(".site-footer");if(footer)footer.textContent=`© 2026 ${siteName}. 하루를, 조금씩`;
     const tc=$("#tagCloud");if(tc)tc.innerHTML=siteTags.map(t=>`<a href="#" data-tag="${esc(t)}">#${esc(t)}</a>`).join("");
   }
   function applyBgm(){
@@ -1406,7 +1406,7 @@
       <div class="bgm-admin-row"><label>사이트 이름</label><input type="text" id="siteNameInput" value="${esc(siteName)}" placeholder="By ccmmhh"><div class="form-actions" style="justify-content:flex-start"><button class="outline-btn" id="siteNameSaveBtn">이름 저장</button></div></div>
       <div class="bgm-admin-row"><label>로고 이미지</label><input type="file" id="logoFileInput" accept="image/*"><div class="bgm-now">${siteSettings.logo_url?"현재 로고가 설정되어 있습니다.":"설정된 로고가 없습니다. 이미지를 올리면 기본 도형 대신 표시됩니다."}</div><div class="form-actions" style="justify-content:flex-start"><button class="outline-btn" id="logoRemoveBtn" ${siteSettings.logo_url?"":"disabled"}>로고 삭제</button></div></div>
       <div class="bgm-admin-row"><label>대문 이미지</label><input type="text" id="heroImageInput" value="${esc(siteSettings.hero_image_url||"")}" placeholder="이미지 URL을 입력하거나 아래에서 업로드"><input type="file" id="heroFileInput" accept="image/*"><div class="bgm-now">${siteSettings.hero_image_url?"현재 대문 이미지가 설정되어 있습니다.":"설정된 대문 이미지가 없습니다."}</div><div class="form-actions" style="justify-content:flex-start"><button class="outline-btn" id="heroImageSaveBtn">대문 이미지 저장</button><button class="outline-btn" id="heroRemoveBtn" ${siteSettings.hero_image_url?"":"disabled"}>대문 이미지 삭제</button></div></div>
-      <div class="bgm-admin-row"><label>대문 소개 문구</label><input type="text" id="heroTextInput" value="${esc(siteSettings.hero_text||"")}" placeholder="조용한 기록을 남깁니다."><div class="form-actions" style="justify-content:flex-start"><button class="outline-btn" id="heroTextSaveBtn">소개 문구 저장</button></div></div>
+      <div class="bgm-admin-row"><label>대문 소개 문구</label><input type="text" id="heroTextInput" value="${esc(siteSettings.hero_text||"")}" placeholder="하루를, 조금씩"><div class="form-actions" style="justify-content:flex-start"><button class="outline-btn" id="heroTextSaveBtn">소개 문구 저장</button></div></div>
       <div class="bgm-admin-row"><label>사이트 태그 (쉼표로 구분)</label><input type="text" id="siteTagsInput" value="${esc(siteTags.join(', '))}" placeholder="미니멀, 일상, 나무"><div class="form-actions" style="justify-content:flex-start"><button class="outline-btn" id="siteTagsSaveBtn">태그 저장</button></div></div>
       <div class="bgm-admin-row"><label>배경음악 파일 업로드 (mp3, m4a 등)</label><input type="file" id="bgmFileInput" accept="audio/*"><div class="bgm-now">${url?"현재 설정된 곡: "+esc(url):"설정된 배경음악이 없습니다. 파일을 올리면 모든 방문자에게 재생 버튼이 나타납니다."}</div><div class="form-actions" style="justify-content:flex-start"><button class="outline-btn" id="bgmRemoveBtn" ${url?"":"disabled"}>배경음악 삭제</button></div></div>`;
     $("#siteNameSaveBtn").onclick=async()=>{
