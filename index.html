@@ -109,7 +109,7 @@
     border-bottom:1px solid var(--border);
     z-index:200;
   }
-  .scroll-progress{position:absolute;left:0;bottom:-1px;width:100%;height:2px;background:var(--text-primary);transform:scaleX(0);transform-origin:left center;transition:transform .12s linear;}
+  .scroll-progress{position:absolute;left:0;bottom:-1px;width:100%;height:2px;background:var(--text-primary);transform:scaleX(0);transform-origin:left center;transition:transform .12s linear;will-change:transform;}
   .brand{
     display:flex; align-items:center; gap:10px;
     font-size:17px; font-weight:700; letter-spacing:-0.02em;
@@ -637,6 +637,7 @@
   }
   .form-field textarea{min-height:150px;resize:vertical;line-height:1.7;}
   .form-field input:focus,.form-field textarea:focus,.form-field select:focus{border-color:var(--text-primary);box-shadow:var(--focus-ring);}
+  .form-field input.is-invalid,.form-field textarea.is-invalid{border-color:var(--danger);}
   .form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;}
   .password-hint{font-size:11px;color:var(--text-tertiary);}
   .auth-switch{text-align:center;margin-top:14px;font-size:12px;color:var(--text-tertiary);}
@@ -702,6 +703,7 @@
   .settings-section .bgm-admin-row{margin-bottom:0;}
   .bgm-now{font-size:12px;color:var(--text-tertiary);word-break:break-all;}
   .toast{min-width:240px;max-width:min(360px,calc(100vw - 36px));padding:12px 14px;border:1px solid var(--border);background:var(--bg-elevated);box-shadow:var(--shadow-md);border-radius:14px;font-size:12px;line-height:1.5;animation:toastIn .28s var(--ease);}
+  .toast-action{margin-left:10px;border:0;background:none;color:var(--text-primary);font:inherit;font-weight:800;text-decoration:underline;cursor:pointer;pointer-events:auto;}
   .toast.success{border-color:color-mix(in srgb,var(--success) 28%,var(--border));}
   .toast.error{border-color:color-mix(in srgb,var(--danger) 28%,var(--border));}
   @keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -816,6 +818,10 @@
   button:active,.tag-pill:active,.mobile-menu a:active,
   .quick-btn:active,.sort-btn:active,.outline-btn:active,.primary-btn:active,.danger-btn:active,
   .post-action:active{transform:scale(.97);}
+  .quick-btn,.sort-btn,.outline-btn,.primary-btn,.danger-btn{min-height:40px;display:inline-flex;align-items:center;justify-content:center;line-height:1.2;}
+  .quick-btn:disabled,.sort-btn:disabled,.outline-btn:disabled,.primary-btn:disabled,.danger-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+  .modal-post-action,.modal-close,.modal-close-btn,.share-btn,.page-btn{display:inline-flex;align-items:center;justify-content:center;}
+  .modal-post-action:disabled,.modal-close:disabled,.modal-close-btn:disabled,.share-btn:disabled,.page-btn:disabled{cursor:not-allowed;}
 
 </style>
 </head>
@@ -833,13 +839,13 @@
   <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
     <div id="mobileCategoryLinks"></div>
     <div class="mobile-menu-divider"></div>
-    <button id="mobileLoginBtn">로그인 / 회원가입</button>
+    <button id="mobileLoginBtn">로그인하고 시작하기</button>
     <button id="mobileMyPageBtn" style="display:none">마이페이지</button>
     <button id="mobileAdminBtn" style="display:none">관리자</button>
   </div>
 
 <header class="site-header">
-  <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+  <div class="scroll-progress" id="scrollProgress" role="progressbar" aria-label="읽기 진행률" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
   <div class="brand">
     <div class="mark" id="brandMark" aria-hidden="true"></div>
     <span>By ccmmhh</span>
@@ -947,7 +953,7 @@
       <span class="m-cat" id="modalCat">사물</span>
       <div class="modal-top-actions">
         <button class="modal-post-action edit" id="modalEditPostBtn" type="button" style="display:none">수정</button>
-        <button class="modal-post-action danger" id="modalDeletePostBtn" type="button" style="display:none">삭제</button>
+        <button class="modal-post-action danger" id="modalDeletePostBtn" type="button" style="display:none">게시글 삭제</button>
         <button class="modal-close" id="modalClose" aria-label="닫기">✕</button>
       </div>
     </div>
@@ -987,7 +993,7 @@
         <div id="commentList"></div>
         <form class="comment-form" id="commentForm">
           <input type="text" id="commentInput" placeholder="따뜻한 댓글을 남겨주세요" required>
-          <button type="submit">등록</button>
+          <button type="submit">댓글 남기기</button>
         </form>
       </div>
     </div>
@@ -1009,7 +1015,7 @@
         <div class="form-actions"><button class="primary-btn" id="authSubmit" type="submit">로그인</button></div>
       </form>
       <div class="auth-switch"><span id="authSwitchText">계정이 없나요?</span> <span class="text-link" id="authSwitch">회원가입</span></div>
-      <p class="password-hint">Supabase Auth가 이메일과 비밀번호를 안전하게 관리합니다. 가입 시 이메일 인증이 켜져 있다면 확인 메일을 먼저 인증하세요.</p>
+      <details class="password-hint"><summary>로그인 안내</summary><span>가입 후 이메일 인증이 필요할 수 있습니다.</span></details>
     </div>
   </div>
 </div>
@@ -1033,7 +1039,7 @@
             <div class="form-field"><label for="profileNewPassword">새 비밀번호</label><input id="profileNewPassword" type="password" minlength="4"></div>
             <div class="form-field"><label for="profileNewPassword2">새 비밀번호 확인</label><input id="profileNewPassword2" type="password" minlength="4"></div>
           </div>
-          <div class="form-actions"><button type="button" class="danger-btn" id="logoutBtn">로그아웃</button><button type="submit" class="primary-btn">프로필 저장</button></div>
+          <div class="form-actions"><button type="button" class="danger-btn" id="logoutBtn">로그아웃</button><button type="submit" class="primary-btn">변경사항 저장</button></div>
         </form>
       </div>
       <div class="admin-pane" id="myPageLikes"></div>
@@ -1081,8 +1087,8 @@
           <div class="form-field full"><label for="postBodyInput">본문</label><textarea id="postBodyInput" required placeholder="문단은 빈 줄로 구분됩니다."></textarea></div>
         </div>
         <div class="form-actions">
-          <button type="button" class="outline-btn" id="draftBtn">임시저장</button>
-          <button type="submit" class="primary-btn">게시하기</button>
+          <button type="button" class="outline-btn" id="draftBtn">초안 저장</button>
+          <button type="submit" class="primary-btn">게시글 발행</button>
         </div>
       </form>
     </div>
@@ -1095,7 +1101,7 @@
     <div class="app-modal-header"><h2>확인</h2><button class="modal-close-btn" data-close-modal="confirmModal">✕</button></div>
     <div class="app-modal-body">
       <div class="confirm-message" id="confirmMessage"></div>
-      <div class="confirm-actions"><button class="outline-btn" data-close-modal="confirmModal">취소</button><button class="primary-btn" id="confirmYes">확인</button></div>
+      <div class="confirm-actions"><button class="outline-btn" data-close-modal="confirmModal">그만두기</button><button class="primary-btn" id="confirmYes">계속하기</button></div>
     </div>
   </div>
 </div>
@@ -1134,7 +1140,19 @@
   const eyeSvg=()=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>`;
   const bubbleSvg=()=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1-2-2h14a2 2 0 0 1 2 2z"/></svg>`;
 
-  function toast(msg,type=""){const e=document.createElement("div");e.className=`toast ${type}`;e.textContent=msg;$("#toastStack").appendChild(e);setTimeout(()=>{e.classList.add("removing");setTimeout(()=>e.remove(),200)},3200)}
+  function toast(msg,type="",action=null){const e=document.createElement("div");e.className=`toast ${type}`;const text=document.createElement("span");text.textContent=msg;e.appendChild(text);if(action){const button=document.createElement("button");button.className="toast-action";button.type="button";button.textContent=action.label;button.onclick=()=>{e.remove();action.onClick()};e.appendChild(button)}$("#toastStack").appendChild(e);setTimeout(()=>{e.classList.add("removing");setTimeout(()=>e.remove(),200)},action?.duration||4200)}
+  function setLiveValidity(input,valid,message){if(!input)return;input.setCustomValidity(valid?"":message);input.setAttribute("aria-invalid",String(!valid));input.classList.toggle("is-invalid",!valid)}
+  function clearLiveValidity(input){if(input)setLiveValidity(input,true,"")}
+  function setupLiveValidation(){
+    const email=$("#authId"),password=$("#authPassword"),nickname=$("#authNickname"),profilePassword=$("#profileNewPassword"),profilePassword2=$("#profileNewPassword2"),postTitle=$("#postTitleInput"),postBody=$("#postBodyInput");
+    email?.addEventListener("input",()=>setLiveValidity(email,!email.value||(!email.validity.typeMismatch&&!email.validity.tooShort&&!email.validity.valueMissing),"이메일 주소를 확인해 주세요."));
+    password?.addEventListener("input",()=>setLiveValidity(password,!password.value||(!password.validity.tooShort&&!password.validity.valueMissing),"비밀번호는 4자 이상 입력해 주세요."));
+    nickname?.addEventListener("input",()=>setLiveValidity(nickname,!!nickname.value.trim(),"닉네임을 입력해 주세요."));
+    profilePassword2?.addEventListener("input",()=>setLiveValidity(profilePassword2,!profilePassword2.value||profilePassword2.value===profilePassword.value,"새 비밀번호가 일치하지 않습니다."));
+    profilePassword?.addEventListener("input",()=>{if(profilePassword2?.value)profilePassword2.dispatchEvent(new Event("input"))});
+    postTitle?.addEventListener("input",()=>setLiveValidity(postTitle,!!postTitle.value.trim(),"제목을 입력해 주세요."));
+    postBody?.addEventListener("input",()=>setLiveValidity(postBody,!!postBody.value.trim(),"본문을 입력해 주세요."));
+  }
   function setButtonBusy(button,busy,label="처리 중…"){
     if(!button)return;
     if(busy){button.dataset.originalText=button.textContent;button.textContent=label;button.disabled=true;}
@@ -1182,7 +1200,7 @@
   }
   function isAdmin(){return !!state.user?.is_admin}
 
-  async function requireReady(){if(!SUPABASE_READY){toast("Supabase 설정이 필요합니다. HTML 상단의 URL과 publishable key를 입력하세요.","error");return false}return true}
+  async function requireReady(){if(!SUPABASE_READY){toast("서비스 설정이 아직 완료되지 않았습니다. 관리자에게 문의해 주세요.","error");return false}return true}
 
   async function loadProfile(userId){
     // Auth 로그인은 성공했지만 profiles 행이 없으면 UI가 로그아웃 상태처럼
@@ -1190,7 +1208,7 @@
     const {data,error}=await sb.from("profiles").select("*").eq("id",userId).maybeSingle();
     if(error){
       console.error("profiles select:", error);
-      toast("프로필 정보를 불러오지 못했습니다. Supabase RLS/SQL 설정을 확인하세요.","error");
+      toast("프로필을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.","error");
       return null;
     }
     if(data) return data;
@@ -1218,7 +1236,7 @@
 
     if(createError){
       console.error("profiles insert:", createError);
-      toast("로그인은 되었지만 프로필 생성에 실패했습니다. Supabase SQL/RLS를 확인하세요.","error");
+      toast("로그인은 되었지만 프로필을 준비하지 못했습니다. 잠시 후 다시 시도해 주세요.","error");
       return null;
     }
     return created;
@@ -1235,6 +1253,7 @@
       sb.from("site_settings").select("*").eq("id",1).maybeSingle()
     ]);
     if(pc.error)console.error(pc.error); if(cc.error)console.error(cc.error); if(ct.error)console.error(ct.error); if(dr.error)console.error(dr.error); if(lk.error)console.error(lk.error); if(bm.error)console.error(bm.error);
+    if(pc.error||cc.error||ct.error||dr.error||lk.error||bm.error)toast("콘텐츠를 모두 불러오지 못했습니다.","error",{label:"다시 시도",onClick:()=>loadAll(keepFeedVisible)});
     if(!ss.error)siteSettings=ss.data||{};else console.warn("site_settings:",ss.error.message);
     applyBgm();applySiteSettings();
     const likeCountMap={};myLikedSet=new Set();
@@ -1244,6 +1263,8 @@
     comments=cc.data||[]; categories=ct.data||[]; drafts=dr.data||[];
     if(state.user)state.user=await loadProfile(state.user.id)||state.user;
     renderAll(keepFeedVisible);
+    const initialPostId=location.hash.startsWith("#post-")?location.hash.slice(6):"";
+    if(!state.openId&&initialPostId&&posts.some(p=>p.id===initialPostId))openPost(initialPostId,false);
   }
   function renderAll(keepFeedVisible=false){
     renderCategories();
@@ -1309,11 +1330,12 @@
   $("#pagination").onclick=e=>{const b=e.target.closest(".page-btn");if(!b||b.disabled)return;if(b.dataset.page==="prev")state.page--;else if(b.dataset.page==="next")state.page++;else state.page=+b.dataset.page;renderFeed();scrollTo({top:0,behavior:"smooth"})}
   let observer;function observeCards(animate=true){if(observer)observer.disconnect();if(!animate||!("IntersectionObserver"in window)){$$(".post-card").forEach(c=>c.classList.add("in-view"));return}observer=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){x.target.classList.add("in-view");observer.unobserve(x.target)}}),{threshold:.08});$$(".post-card").forEach(c=>observer.observe(c))}
 
-  async function openPost(id){
+  async function openPost(id,pushHistory=true){
     const p=posts.find(x=>x.id===id);if(!p)return;
     if(p.is_private&&!state.user){toast("로그인이 필요한 비공개 게시물입니다.","error");openAuth("login");return}
     const shouldCountView=state.openId!==id;
     state.openId=id;
+    if(pushHistory&&location.hash!==`#post-${id}`)history.pushState({postId:id},"",`#post-${id}`);
     updatePrevNext();
     const canManage=isAdmin();
     $("#modalEditPostBtn").style.display=canManage?"":"none";
@@ -1322,7 +1344,12 @@
     $("#modalCat").textContent=p.catLabel;renderGallery(p);$("#modalTitle").textContent=p.title;$("#modalMeta").innerHTML=`<span>${fmtDate(p.published_at)}</span><span>조회 ${(p.views||0).toLocaleString()}</span><span>댓글 ${getComments(id).length}</span>`;$("#modalLikeCount").textContent=p.likes_count||0;$("#modalLikeBtn").classList.toggle("active",!!p.isLiked);$("#modalLikeBtn").innerHTML=`${p.isLiked?"♥":"♡"} 공감 <span id="modalLikeCount">${p.likes_count||0}</span>`;$("#modalBookmarkBtn").classList.toggle("active",!!p.isBookmarked);$("#modalBookmarkBtn").innerHTML=`${p.isBookmarked?"★":"☆"} 북마크`;$("#modalTags").innerHTML=(p.tags||[]).map(t=>`<button class="tag-pill" data-tag="${esc(t)}">#${esc(t)}</button>`).join("");$("#modalBody").innerHTML=(p.body||[]).map(x=>`<p>${esc(x)}</p>`).join("");
     renderComments(id);clearTimeout($("#modalOverlay").closeTimer);$("#modalOverlay").classList.remove("closing");$("#modalOverlay").classList.add("open");document.body.classList.add("modal-lock");renderFeed();renderProfile()
   }
-  function closePost(){const overlay=$("#modalOverlay");overlay.classList.remove("open");overlay.classList.add("closing");clearTimeout(overlay.closeTimer);overlay.closeTimer=setTimeout(()=>overlay.classList.remove("closing"),240);document.body.classList.remove("modal-lock");state.openId=null}
+  function closePost(updateHistory=true){const overlay=$("#modalOverlay");overlay.classList.remove("open");overlay.classList.add("closing");clearTimeout(overlay.closeTimer);overlay.closeTimer=setTimeout(()=>overlay.classList.remove("closing"),240);document.body.classList.remove("modal-lock");state.openId=null;if(updateHistory&&location.hash.startsWith("#post-"))history.back()}
+  window.addEventListener("popstate",()=>{
+    const postId=location.hash.startsWith("#post-")?location.hash.slice(6):"";
+    if(postId&&posts.some(p=>p.id===postId))openPost(postId,false);
+    else if(state.openId)closePost(false);
+  });
   $("#modalClose").onclick=closePost;$("#modalOverlay").onclick=e=>{if(e.target.id==="modalOverlay")closePost()};
   $("#modalEditPostBtn").onclick=()=>{const p=posts.find(x=>x.id===state.openId);if(!p)return;closePost();openEditor(p)};
   $("#modalDeletePostBtn").onclick=()=>{const id=state.openId;if(id)deletePost(id)};
@@ -1343,7 +1370,7 @@
 
   function commentHTML(c,isReply){
     const mine=state.user&&c.user_id===state.user.id;
-    return `<div class="comment${isReply?" is-reply":""}" data-comment-id="${c.id}"><div class="c-avatar${isReply?" small":""}" style="${c.profiles?.avatar_url?`background-image:url('${esc(c.profiles.avatar_url)}');background-size:cover;background-position:center`:""}"></div><div class="c-body"><span class="c-name">${esc(c.profiles?.nickname||"회원")}</span>${c.profiles?.is_admin?` <span class="admin-badge">작성자</span>`:""}<span class="c-date">${fmtDate(c.created_at)}</span><div class="c-text" data-comment-text="${c.id}">${esc(c.content)}</div><div class="c-actions">${isReply?"":`<button type="button" class="c-reply-btn" data-reply-to="${c.id}">답글 달기</button>`}${mine?`<button type="button" class="c-reply-btn" data-edit-comment="${c.id}">수정</button><button type="button" class="c-reply-btn c-delete-btn" data-delete-comment-self="${c.id}">삭제</button>`:""}</div>${isReply?"":`<div class="reply-form-wrap" data-reply-form-wrap="${c.id}"></div>`}</div></div>`;
+    return `<div class="comment${isReply?" is-reply":""}" data-comment-id="${c.id}"><div class="c-avatar${isReply?" small":""}" style="${c.profiles?.avatar_url?`background-image:url('${esc(c.profiles.avatar_url)}');background-size:cover;background-position:center`:""}"></div><div class="c-body"><span class="c-name">${esc(c.profiles?.nickname||"회원")}</span>${c.profiles?.is_admin?` <span class="admin-badge">작성자</span>`:""}<span class="c-date">${fmtDate(c.created_at)}</span><div class="c-text" data-comment-text="${c.id}">${esc(c.content)}</div><div class="c-actions">${isReply?"":`<button type="button" class="c-reply-btn" data-reply-to="${c.id}">답글 남기기</button>`}${mine?`<button type="button" class="c-reply-btn" data-edit-comment="${c.id}">댓글 수정</button><button type="button" class="c-reply-btn c-delete-btn" data-delete-comment-self="${c.id}">댓글 삭제</button>`:""}</div>${isReply?"":`<div class="reply-form-wrap" data-reply-form-wrap="${c.id}"></div>`}</div></div>`;
   }
   function commentBlockHTML(c){
     const replies=getReplies(c.id);
@@ -1360,7 +1387,7 @@
     $$("[data-edit-comment]").forEach(b=>b.onclick=()=>{
       const cid=b.dataset.editComment,c=comments.find(x=>x.id===cid);if(!c)return;
       const textEl=$(`[data-comment-text="${cid}"]`);
-      textEl.innerHTML=`<form class="comment-form edit-form" style="margin-top:4px"><input type="text" class="edit-input" value="${esc(c.content)}" required><button type="submit">저장</button><button type="button" class="outline-btn" data-cancel-edit style="padding:0 16px;border-radius:999px">취소</button></form>`;
+      textEl.innerHTML=`<form class="comment-form edit-form" style="margin-top:4px"><input type="text" class="edit-input" value="${esc(c.content)}" required><button type="submit">댓글 수정</button><button type="button" class="outline-btn" data-cancel-edit style="padding:0 16px;border-radius:999px">수정 취소</button></form>`;
       const form=textEl.querySelector("form"),input=textEl.querySelector(".edit-input");
       input.focus();
       form.onsubmit=async e=>{
@@ -1373,7 +1400,7 @@
     });
     $$("[data-delete-comment-self]").forEach(b=>b.onclick=()=>{
       const cid=b.dataset.deleteCommentSelf;
-      confirmAction("댓글을 삭제하시겠습니까?",async()=>{
+      confirmAction("이 댓글을 삭제할까요?",async()=>{
         const {error}=await sb.from("comments").delete().eq("id",cid);
         if(error){console.error(error);toast("댓글 삭제에 실패했습니다.","error");return}
         await loadAll();await openPost(postId);toast("댓글이 삭제되었습니다.","success")
@@ -1384,7 +1411,7 @@
     $$("[data-reply-to]").forEach(b=>b.onclick=()=>{
       const cid=b.dataset.replyTo,wrap=$(`[data-reply-form-wrap="${cid}"]`);
       if(wrap.innerHTML){wrap.innerHTML="";return}
-      wrap.innerHTML=`<form class="comment-form reply-form" data-reply-submit="${cid}"><input type="text" class="reply-input" placeholder="답글을 남겨주세요" required><button type="submit">등록</button></form>`;
+      wrap.innerHTML=`<form class="comment-form reply-form" data-reply-submit="${cid}"><input type="text" class="reply-input" placeholder="답글을 남겨주세요" required><button type="submit">답글 남기기</button></form>`;
       const form=wrap.querySelector("form"),input=wrap.querySelector(".reply-input");
       form.onsubmit=async e=>{
         e.preventDefault();const submit=form.querySelector("button[type=submit]");
@@ -1437,7 +1464,7 @@
 
   document.body.onclick=e=>{const op=e.target.closest("[data-open]");if(op&&!e.target.closest("button")&&!e.target.closest(".post-actions")){e.preventDefault();closeModal("myPageModal");openPost(op.dataset.open);return}const like=e.target.closest("[data-like]");if(like){e.preventDefault();e.stopPropagation();toggleLike(like.dataset.like);return}const bm=e.target.closest("[data-bookmark]");if(bm){e.preventDefault();e.stopPropagation();toggleBookmark(bm.dataset.bookmark);return}const tag=e.target.closest("[data-tag]");if(tag){e.preventDefault();state.search=tag.dataset.tag;state.page=1;$("#searchInput").value=state.search;closePost();renderFeed()}};
   document.onkeydown=e=>{if(e.key==="Enter"){const c=e.target.closest(".post-card");if(c)openPost(c.dataset.open)}if(e.key==="Escape"){closePost();closeSearch();closeMobileMenu()}};
-  function updateScrollProgress(){const max=document.documentElement.scrollHeight-window.innerHeight,progress=max>0?window.scrollY/max:0;$("#scrollProgress").style.transform=`scaleX(${Math.min(1,Math.max(0,progress))})`}
+  function updateScrollProgress(){const max=document.documentElement.scrollHeight-window.innerHeight,progress=max>0?Math.min(1,Math.max(0,window.scrollY/max)):0,$bar=$("#scrollProgress");$bar.style.transform=`scaleX(${progress})`;$bar.setAttribute("aria-valuenow",String(Math.round(progress*100)))}
   window.addEventListener("scroll",updateScrollProgress,{passive:true});
   window.addEventListener("resize",updateScrollProgress);
   updateScrollProgress();
@@ -1472,9 +1499,9 @@
   $("#mobileAdminBtn").onclick=()=>{closeMobileMenu();openAdmin()};
   document.addEventListener("keydown",e=>{if(e.key==="Escape")closeMobileMenu()});
 
-  function openAuth(mode="login"){authMode=mode;$("#authTitle").textContent=mode==="login"?"로그인":"회원가입";$("#authSubmit").textContent=mode==="login"?"로그인":"회원가입";$("#authNicknameField").style.display=mode==="login"?"none":"block";$("#authSwitchText").textContent=mode==="login"?"계정이 없나요?":"이미 계정이 있나요?";$("#authSwitch").textContent=mode==="login"?"회원가입":"로그인";$("#authForm").reset();$("#authId").type="email";$("#authId").placeholder="이메일 주소";openModal("authModal")}
+  function openAuth(mode="login"){authMode=mode;$("#authTitle").textContent=mode==="login"?"로그인":"회원가입";$("#authSubmit").textContent=mode==="login"?"로그인":"회원가입";$("#authNicknameField").style.display=mode==="login"?"none":"block";$("#authSwitchText").textContent=mode==="login"?"계정이 없나요?":"이미 계정이 있나요?";$("#authSwitch").textContent=mode==="login"?"회원가입":"로그인";$("#authForm").reset();clearLiveValidity($("#authId"));clearLiveValidity($("#authPassword"));clearLiveValidity($("#authNickname"));$("#authId").type="email";$("#authId").placeholder="이메일 주소";openModal("authModal")}
   $("#loginQuickBtn").onclick=()=>openAuth();$("#authSwitch").onclick=()=>openAuth(authMode==="login"?"register":"login");
-  $("#authForm").onsubmit=async e=>{e.preventDefault();if(!await requireReady())return;const email=$("#authId").value.trim(),password=$("#authPassword").value;if(authMode==="register"){const nickname=$("#authNickname").value.trim();if(!nickname){toast("닉네임을 입력하세요.","error");return}const {data,error}=await sb.auth.signUp({email,password,options:{data:{nickname}}});if(error){toast(error.message,"error");return}closeModal("authModal");toast(data.session?"회원가입이 완료되었습니다.":"가입 확인 이메일을 확인해주세요.","success")}else{const {error}=await sb.auth.signInWithPassword({email,password});if(error){toast(error.message,"error");return}closeModal("authModal");toast("로그인되었습니다.","success")}};
+  $("#authForm").onsubmit=async e=>{e.preventDefault();if(!await requireReady())return;const email=$("#authId").value.trim(),password=$("#authPassword").value;if(authMode==="register"){const nickname=$("#authNickname").value.trim();if(!nickname){toast("닉네임을 입력하세요.","error");return}const {data,error}=await sb.auth.signUp({email,password,options:{data:{nickname}}});if(error){toast(error.message,"error");return}if(data?.user&&Array.isArray(data.user.identities)&&data.user.identities.length===0){toast("이미 가입된 이메일입니다. 로그인해 주세요.","error");return}closeModal("authModal");toast(data.session?"회원가입이 완료되었습니다.":"가입 확인 이메일을 확인해주세요.","success")}else{const {error}=await sb.auth.signInWithPassword({email,password});if(error){toast(error.message,"error");return}closeModal("authModal");toast("로그인되었습니다.","success")}};
 
   async function openMyPage(){if(!state.user){openAuth();return}$("#profileNickname").value=state.user.nickname||"";$("#profileAvatar").value=state.user.avatar_url||"";$("#profileBio").value=state.user.bio||"";$("#profileNewPassword").value="";$("#profileNewPassword2").value="";renderMyPageLists();openModal("myPageModal")}
   function myPageItem(p){return `<div class="admin-item" data-open="${p.id}" style="cursor:pointer"><div class="admin-item-main"><div class="admin-item-title">${esc(p.title)}</div><div class="admin-item-sub">${esc(p.catLabel)} · ${fmtDate(p.published_at)}</div></div></div>`}
@@ -1510,7 +1537,7 @@
     $("#adminDashboard").innerHTML=`<div class="stat-grid"><div class="stat-box"><strong>${postCount||0}</strong><span>총 게시글</span></div><div class="stat-box"><strong>${commentCount||0}</strong><span>총 댓글</span></div><div class="stat-box"><strong>${likeCount||0}</strong><span>총 좋아요</span></div><div class="stat-box"><strong>${visitCount||0}</strong><span>총 방문</span></div><div class="stat-box"><strong>${todayVisits||0}</strong><span>오늘 방문</span></div><div class="stat-box"><strong>${yesterdayVisits||0}</strong><span>어제 방문</span></div><div class="stat-box"><strong>${weekVisits||0}</strong><span>최근 7일 방문</span></div><div class="stat-box"><strong>${monthVisits||0}</strong><span>최근 30일 방문</span></div></div><div class="quick-actions"><button class="primary-btn" id="newPostBtn">+ 새 글 작성</button><button class="outline-btn" id="draftListBtn">임시저장 ${drafts.length}</button></div>`;$("#newPostBtn").onclick=()=>openEditor();$("#draftListBtn").onclick=()=>drafts[0]?openEditor(drafts[0],true):toast("임시저장 글이 없습니다.");
     $("#adminPosts").innerHTML=`<div class="quick-actions"><button class="primary-btn" id="newPostBtn2">+ 새 글 작성</button></div><div class="admin-list">${posts.map(p=>`<div class="admin-item"><div class="admin-item-main"><div class="admin-item-title">${esc(p.title)}</div><div class="admin-item-sub">${esc(p.catLabel)} · ${fmtDate(p.published_at)}</div></div><div class="admin-item-actions"><button class="outline-btn" data-edit-post="${p.id}">수정</button><button class="danger-btn" data-delete-post="${p.id}">삭제</button></div></div>`).join("")}</div>`;$("#newPostBtn2").onclick=()=>openEditor();$$('[data-edit-post]').forEach(b=>b.onclick=()=>openEditor(posts.find(p=>p.id===b.dataset.editPost)));$$('[data-delete-post]').forEach(b=>b.onclick=()=>deletePost(b.dataset.deletePost));
     $("#adminCategories").innerHTML=`<form class="comment-form" id="addCategoryForm" style="margin:0 0 16px"><input type="text" id="newCategoryName" placeholder="새 카테고리 이름" maxlength="30" required><button class="primary-btn" type="submit">추가</button></form><div class="admin-list">${categories.map(c=>`<div class="admin-item"><div class="admin-item-main"><div class="admin-item-title">${esc(c.name)}</div><div class="admin-item-sub">${posts.filter(p=>p.category_id===c.id).length}개 글</div></div><div class="admin-item-actions"><button class="outline-btn" data-edit-cat="${c.id}">수정</button><button class="danger-btn" data-delete-cat="${c.id}">삭제</button></div></div>`).join("")}</div>`;$("#addCategoryForm").onsubmit=async e=>{e.preventDefault();const input=$("#newCategoryName"),name=input.value.trim();if(!name)return;await addCategory(name);if(!input.disabled)input.value=""};$$('[data-edit-cat]').forEach(b=>b.onclick=()=>editCategory(b.dataset.editCat));$$('[data-delete-cat]').forEach(b=>b.onclick=()=>deleteCategory(b.dataset.deleteCat));
-    const {data:cs}=await sb.from("comments").select("*,profiles(nickname)").order("created_at",{ascending:false});$("#adminComments").innerHTML=cs?.length?`<div class="admin-list">${cs.map(c=>`<div class="admin-item"><div class="admin-item-main"><div class="admin-item-title">${c.parent_id?"↳ ":""}${esc(c.content)}</div><div class="admin-item-sub">${esc(c.profiles?.nickname||"회원")} · ${fmtDate(c.created_at)} ${c.parent_id?"· 답글":""} ${c.is_hidden?"· 숨김":""}</div></div><div class="admin-item-actions"><button class="outline-btn" data-hide-comment="${c.id}">${c.is_hidden?"표시":"숨김"}</button><button class="danger-btn" data-delete-comment="${c.id}">삭제</button></div></div>`).join("")}</div>`:`<div class="empty-state"><strong>댓글이 없습니다.</strong></div>`;$$('[data-hide-comment]').forEach(b=>b.onclick=async()=>{const c=cs.find(x=>x.id===b.dataset.hideComment);const r=await sb.from("comments").update({is_hidden:!c.is_hidden}).eq("id",c.id);if(r.error)toast(r.error.message,"error");else renderAdmin()});$$('[data-delete-comment]').forEach(b=>b.onclick=()=>confirmAction("댓글을 삭제하시겠습니까?",async()=>{const r=await sb.from("comments").delete().eq("id",b.dataset.deleteComment);if(r.error)toast(r.error.message,"error");else{await loadAll();renderAdmin();toast("댓글이 삭제되었습니다.","success")}}));
+    const {data:cs}=await sb.from("comments").select("*,profiles(nickname)").order("created_at",{ascending:false});$("#adminComments").innerHTML=cs?.length?`<div class="admin-list">${cs.map(c=>`<div class="admin-item"><div class="admin-item-main"><div class="admin-item-title">${c.parent_id?"↳ ":""}${esc(c.content)}</div><div class="admin-item-sub">${esc(c.profiles?.nickname||"회원")} · ${fmtDate(c.created_at)} ${c.parent_id?"· 답글":""} ${c.is_hidden?"· 숨김":""}</div></div><div class="admin-item-actions"><button class="outline-btn" data-hide-comment="${c.id}">${c.is_hidden?"표시":"숨김"}</button><button class="danger-btn" data-delete-comment="${c.id}">삭제</button></div></div>`).join("")}</div>`:`<div class="empty-state"><strong>댓글이 없습니다.</strong></div>`;$$('[data-hide-comment]').forEach(b=>b.onclick=async()=>{const c=cs.find(x=>x.id===b.dataset.hideComment);const r=await sb.from("comments").update({is_hidden:!c.is_hidden}).eq("id",c.id);if(r.error)toast(r.error.message,"error");else renderAdmin()});$$('[data-delete-comment]').forEach(b=>b.onclick=()=>{const deleted=cs.find(x=>x.id===b.dataset.deleteComment),row=deleted?{...deleted}:null;if(row)delete row.profiles;confirmAction("이 댓글을 삭제할까요?",async()=>{const r=await sb.from("comments").delete().eq("id",b.dataset.deleteComment);if(r.error)toast("댓글을 삭제하지 못했습니다. 잠시 후 다시 시도해 주세요.","error");else{await loadAll();renderAdmin();toast("댓글을 삭제했습니다.","success",{label:"실행 취소",onClick:async()=>{if(!row)return;const undo=await sb.from("comments").insert(row);if(undo.error)toast("댓글을 되돌리지 못했습니다.","error");else{await loadAll();renderAdmin();toast("댓글을 되돌렸습니다.","success")}}})}})});
     renderBgmAdmin();
   }
   function deletePost(id){
@@ -1603,7 +1630,7 @@
   }
   async function addCategory(name){if(!isAdmin()||!name?.trim())return;const r=await sb.from("categories").insert({name:name.trim(),slug:slugId(),sort_order:categories.length});if(r.error){console.error("category insert:",r.error);toast("카테고리 추가에 실패했습니다.","error");return}await loadAll();toast("카테고리가 추가되었습니다.","success")}
   async function editCategory(id){const c=categories.find(x=>x.id===id);const name=prompt("카테고리 이름",c?.name);if(!name?.trim())return;const r=await sb.from("categories").update({name:name.trim()}).eq("id",id);if(r.error)toast(r.error.message,"error");else{await loadAll();toast("카테고리가 수정되었습니다.","success")}}
-  function deleteCategory(id){if(posts.some(p=>p.category_id===id))return toast("게시글이 있는 카테고리는 삭제할 수 없습니다.","error");confirmAction("카테고리를 삭제하시겠습니까?",async()=>{const r=await sb.from("categories").delete().eq("id",id);if(r.error)toast(r.error.message,"error");else{await loadAll();toast("카테고리가 삭제되었습니다.","success")}})}
+  function deleteCategory(id){if(posts.some(p=>p.category_id===id))return toast("게시글이 있는 카테고리는 먼저 비워 주세요.","error");const category=categories.find(c=>c.id===id);confirmAction("이 카테고리를 삭제할까요?",async()=>{const r=await sb.from("categories").delete().eq("id",id);if(r.error)toast("카테고리를 삭제하지 못했습니다. 잠시 후 다시 시도해 주세요.","error");else{await loadAll();toast("카테고리를 삭제했습니다.","success",{label:"실행 취소",onClick:async()=>{if(!category)return;const undo=await sb.from("categories").insert(category);if(undo.error)toast("카테고리를 되돌리지 못했습니다.","error");else{await loadAll();toast("카테고리를 되돌렸습니다.","success")}}})}})}
 
   async function openEditor(post=null,fromDraft=false){if(!isAdmin()){toast("관리자만 글을 작성할 수 있습니다.","error");return}fillCategorySelect();$("#postForm").reset();$("#editPostId").value="";$("#editorTitle").textContent=post?(fromDraft?"임시저장 이어쓰기":"글 수정"):"글 작성";editorMedia=(post?.media||[]).slice();renderMediaPreview();$("#postPrivateInput").checked=!!post?.is_private;if(post){$("#editPostId").value=post.id||"";$("#postTitleInput").value=post.title||"";$("#postCategoryInput").value=post.category_id||post.cat||categories[0]?.id;$("#postTagsInput").value=(post.tags||[]).join(", ");$("#postExcerptInput").value=post.excerpt||"";$("#postImageInput").value=post.cover_image_url||post.image||"";$("#postBodyInput").value=(post.content_blocks||post.body||[]).join("\n\n")}openModal("editorModal")}
   function renderMediaPreview(){
@@ -1710,6 +1737,7 @@
       },0);
     });
   }
+  setupLiveValidation();
   initSupabase();
 })();
 </script>
