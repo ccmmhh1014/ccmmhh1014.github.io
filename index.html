@@ -1632,6 +1632,17 @@
   async function editCategory(id){const c=categories.find(x=>x.id===id);const name=prompt("카테고리 이름",c?.name);if(!name?.trim())return;const r=await sb.from("categories").update({name:name.trim()}).eq("id",id);if(r.error)toast(r.error.message,"error");else{await loadAll();toast("카테고리가 수정되었습니다.","success")}}
   function deleteCategory(id){if(posts.some(p=>p.category_id===id))return toast("게시글이 있는 카테고리는 먼저 비워 주세요.","error");const category=categories.find(c=>c.id===id);confirmAction("이 카테고리를 삭제할까요?",async()=>{const r=await sb.from("categories").delete().eq("id",id);if(r.error)toast("카테고리를 삭제하지 못했습니다. 잠시 후 다시 시도해 주세요.","error");else{await loadAll();toast("카테고리를 삭제했습니다.","success",{label:"실행 취소",onClick:async()=>{if(!category)return;const undo=await sb.from("categories").insert(category);if(undo.error)toast("카테고리를 되돌리지 못했습니다.","error");else{await loadAll();toast("카테고리를 되돌렸습니다.","success")}}})}})}
 
+  async function uploadPostMedia(file,path){
+    if(!state.user){toast("이미지를 업로드하려면 먼저 로그인하세요.","error");return null}
+    const result=await sb.storage.from("blog-media").upload(path,file,{upsert:true,contentType:file.type});
+    if(result.error){
+      const message=result.error.message||"업로드에 실패했습니다.";
+      toast(message.includes("Bucket not found")?"Supabase Storage에 blog-media 버킷이 없습니다.":message,"error");
+      return null;
+    }
+    return sb.storage.from("blog-media").getPublicUrl(path).data.publicUrl;
+  }
+
   async function openEditor(post=null,fromDraft=false){if(!isAdmin()){toast("관리자만 글을 작성할 수 있습니다.","error");return}fillCategorySelect();$("#postForm").reset();$("#editPostId").value="";$("#editorTitle").textContent=post?(fromDraft?"임시저장 이어쓰기":"글 수정"):"글 작성";editorMedia=(post?.media||[]).slice();renderMediaPreview();$("#postPrivateInput").checked=!!post?.is_private;if(post){$("#editPostId").value=post.id||"";$("#postTitleInput").value=post.title||"";$("#postCategoryInput").value=post.category_id||post.cat||categories[0]?.id;$("#postTagsInput").value=(post.tags||[]).join(", ");$("#postExcerptInput").value=post.excerpt||"";$("#postImageInput").value=post.cover_image_url||post.image||"";$("#postBodyInput").value=(post.content_blocks||post.body||[]).join("\n\n")}openModal("editorModal")}
   function renderMediaPreview(){
     $("#mediaPreviewGrid").innerHTML=editorMedia.map((m,i)=>`<div class="media-thumb">${m.type==="video"?`<video src="${esc(m.url)}" muted></video>`:`<img src="${esc(m.url)}">`}<button type="button" class="media-remove-btn" data-remove-media="${i}">✕</button></div>`).join("");
@@ -1639,18 +1650,17 @@
   }
   $("#postMediaFile").onchange=async e=>{
     const files=[...e.target.files];if(!files.length||!state.user)return;
+      const files=[...e.target.files];if(!files.length)return;if(!state.user){toast("사진을 업로드하려면 먼저 로그인하세요.","error");e.target.value="";return}
     for(const file of files){
       const isVideo=file.type.startsWith("video");
       const ext=file.name.split(".").pop().toLowerCase()||(isVideo?"mp4":"jpg"),path=`posts/${state.user.id}/${crypto.randomUUID()}.${ext}`;
-      const r=await sb.storage.from("blog-media").upload(path,file,{upsert:true,contentType:file.type});
-      if(r.error){toast(r.error.message,"error");continue}
-      const {data}=sb.storage.from("blog-media").getPublicUrl(path);
-      editorMedia.push({url:data.publicUrl,type:isVideo?"video":"image"});
+      const url=await uploadPostMedia(file,path);if(url)editorMedia.push({url,type:isVideo?"video":"image"});
     }
     e.target.value="";renderMediaPreview();toast("업로드가 완료되었습니다.","success")
   };
   $("#postForm").onsubmit=async e=>{e.preventDefault();const id=$("#editPostId").value,cat=$("#postCategoryInput").value,data={title:$("#postTitleInput").value.trim(),category_id:cat,tags:$("#postTagsInput").value.split(",").map(x=>x.trim()).filter(Boolean),excerpt:$("#postExcerptInput").value.trim(),cover_image_url:$("#postImageInput").value.trim()||editorMedia.find(m=>m.type==="image")?.url||null,media:editorMedia,content_blocks:$("#postBodyInput").value.split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean),is_private:$("#postPrivateInput").checked,status:"published"};if(!id)data.published_at=new Date().toISOString();if(!data.title||!data.content_blocks.length)return toast("제목과 본문을 입력하세요.","error");let r=id?await sb.from("posts").update(data).eq("id",id):await sb.from("posts").insert({...data,author_id:state.user.id});if(r.error){toast(r.error.message,"error");return}closeModal("editorModal");await loadAll();toast(id?"게시글이 수정되었습니다.":"게시글이 게시되었습니다.","success")};
   $("#postImageFile").onchange=async e=>{const file=e.target.files[0];if(!file||!state.user)return;const ext=file.name.split(".").pop().toLowerCase()||"jpg",path=`posts/${state.user.id}/${crypto.randomUUID()}.${ext}`;const r=await sb.storage.from("blog-media").upload(path,file,{upsert:true,contentType:file.type});if(r.error){toast(r.error.message,"error");return}const {data}=sb.storage.from("blog-media").getPublicUrl(path);$("#postImageInput").value=data.publicUrl;toast("대표 이미지가 업로드되었습니다.","success")};
+    $("#postImageFile").onchange=async e=>{const file=e.target.files[0];if(!file)return;if(!state.user){toast("대표 이미지를 업로드하려면 먼저 로그인하세요.","error");e.target.value="";return}const ext=file.name.split(".").pop().toLowerCase()||"jpg",path=`posts/${state.user.id}/${crypto.randomUUID()}.${ext}`,url=await uploadPostMedia(file,path);if(url){$("#postImageInput").value=url;toast("대표 이미지가 업로드되었습니다.","success")}e.target.value=""};
   $("#draftBtn").onclick=async()=>{const d={user_id:state.user.id,title:$("#postTitleInput").value.trim(),category_id:$("#postCategoryInput").value,tags:$("#postTagsInput").value.split(",").map(x=>x.trim()).filter(Boolean),excerpt:$("#postExcerptInput").value.trim(),cover_image_url:$("#postImageInput").value.trim()||null,media:editorMedia,content_blocks:$("#postBodyInput").value.split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean),is_private:$("#postPrivateInput").checked};const r=await sb.from("drafts").insert(d);if(r.error)toast(r.error.message,"error");else{await loadAll();toast("임시저장되었습니다.","success")}};
 
   async function uploadAvatar(file){if(!state.user||!file)return;const ext=file.name.split(".").pop().toLowerCase()||"jpg",path=`avatars/${state.user.id}/${crypto.randomUUID()}.${ext}`;const r=await sb.storage.from("blog-media").upload(path,file,{upsert:true,contentType:file.type});if(r.error){toast(r.error.message,"error");return}const {data}=sb.storage.from("blog-media").getPublicUrl(path);$("#profileAvatar").value=data.publicUrl;toast("프로필 이미지가 업로드되었습니다.","success")}
