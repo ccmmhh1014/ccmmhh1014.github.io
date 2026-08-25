@@ -9,6 +9,13 @@
     font-family: 'Pretendard';
     src: local('Pretendard');
   }
+  @font-face {
+    font-family: 'SUIT';
+    src: url('https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/woff2/SUIT-Variable.woff2') format('woff2');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
 
   :root{
     --default-avatar: url('data:image/jpeg;base64,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');    --ink-900:#0a0a0a;
@@ -53,7 +60,11 @@
   }
 
   *{box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
+  html{scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--ink-400) transparent;}
+  ::-webkit-scrollbar{width:8px;height:8px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:var(--ink-200);border:2px solid transparent;border-radius:999px;background-clip:padding-box;}
+  ::-webkit-scrollbar-thumb:hover{background:var(--ink-400);border-width:1px;}
   @media (prefers-reduced-motion: reduce){
     html{scroll-behavior:auto;}
     *,*::before,*::after{
@@ -66,7 +77,7 @@
 
   body{
     margin:0;
-    font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Pretendard',"Apple SD Gothic Neo",sans-serif;
+    font-family:'SUIT',-apple-system,BlinkMacSystemFont,'SF Pro Text','Pretendard',"Apple SD Gothic Neo",sans-serif;
     background:var(--bg);
     color:var(--text-primary);
     -webkit-font-smoothing:antialiased;
@@ -648,10 +659,23 @@
   .empty-state strong{display:block;color:var(--text-primary);font-size:14px;margin-bottom:6px;}
   .skeleton{background:linear-gradient(90deg,var(--surface),color-mix(in srgb,var(--surface) 60%,var(--bg-elevated)),var(--surface));background-size:200% 100%;animation:skeleton 1.1s linear infinite;border-radius:10px;}
   @keyframes skeleton{to{background-position:-200% 0;}}
-  .loading-screen{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;align-items:center;justify-content:center;transition:opacity .25s;}
+  .loading-screen{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden;transition:opacity .25s;}
   .loading-screen.hide{opacity:0;pointer-events:none;}
-  .loading-dot{width:8px;height:8px;border-radius:50%;background:var(--text-primary);box-shadow:14px 0 0 var(--text-primary),28px 0 0 var(--text-primary);animation:loadingDots 1s infinite ease-in-out;}
-  @keyframes loadingDots{0%,100%{opacity:.25;transform:translateX(0)}50%{opacity:1;transform:translateX(3px)}}
+  body.auth-pending #loginQuickBtn,
+  body.auth-pending #mobileLoginBtn,
+  body.auth-pending #mobileMyPageBtn,
+  body.auth-pending #adminQuickBtn,
+  body.auth-pending #profileEditBtn{visibility:hidden;}
+  .loading-screen::before,.loading-screen::after{content:"";position:absolute;width:180px;height:180px;border:1px solid color-mix(in srgb,var(--text-primary) 22%,transparent);border-radius:50%;animation:loadingOrbit 1.1s cubic-bezier(.25,.1,.25,1) infinite;}
+  .loading-screen::before{border-right-color:transparent;border-bottom-color:transparent;}
+  .loading-screen::after{width:260px;height:260px;border-left-color:transparent;border-top-color:transparent;animation-direction:reverse;animation-duration:1.5s;}
+  .loading-brand{position:relative;z-index:1;display:flex;align-items:center;gap:10px;color:var(--text-primary);animation:loadingBrand 1.1s cubic-bezier(.25,.1,.25,1) both;}
+  .loading-brand .mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--ink-900),var(--ink-400));animation:loadingMark 1.1s cubic-bezier(.16,1,.3,1) infinite;}
+  .loading-brand strong{font-size:14px;letter-spacing:.02em;animation:loadingText 1.1s cubic-bezier(.25,.1,.25,1) both;}
+  @keyframes loadingOrbit{from{opacity:0;transform:rotate(0deg) scale(.35)}35%{opacity:1}to{opacity:.35;transform:rotate(360deg) scale(1.15)}}
+  @keyframes loadingBrand{from{opacity:0;transform:scale(1.8) rotate(-8deg)}55%{opacity:1;transform:scale(.92) rotate(2deg)}to{transform:scale(1) rotate(0)}}
+  @keyframes loadingMark{0%,100%{transform:rotate(0deg) scale(1)}50%{transform:rotate(180deg) scale(1.16)}}
+  @keyframes loadingText{from{opacity:0;transform:translateX(18px);letter-spacing:.28em}to{opacity:1;transform:translateX(0);letter-spacing:.02em}}
 
   .toast-stack{position:fixed;right:18px;bottom:18px;z-index:1200;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
 
@@ -717,12 +741,80 @@
     .quick-actions{margin-bottom:12px;}
   }
 
+  @media (max-width:640px){
+    header.site-header{height:60px;padding:0 14px;}
+    .brand{font-size:16px;gap:8px;}
+    .brand .mark{width:24px;height:24px;border-radius:7px;}
+    .header-actions{gap:6px;}
+    .icon-btn{width:36px;height:36px;}
+    .page-wrap{padding:calc(60px + 18px) 14px 48px;gap:24px;}
+    .site-hero{width:calc(100% - 28px);height:176px;margin-top:calc(60px + 14px);border-radius:16px;}
+    .site-hero-content{padding:20px 18px;}
+    .site-hero-content strong{font-size:24px;}
+    .feed-header{margin:0 2px 14px;}
+    .feed-header h1{font-size:23px;}
+    .feed-header .feed-sub{font-size:12px;}
+    .quick-actions{justify-content:flex-end;margin:0 0 12px;}
+    .quick-btn{min-height:40px;padding:9px 14px;}
+    .sort-row{justify-content:flex-start;overflow-x:auto;margin:0 0 14px;padding:2px 0 4px;scrollbar-width:none;}
+    .sort-row::-webkit-scrollbar{display:none;}
+    .sort-btn{min-height:40px;padding:9px 14px;flex:0 0 auto;}
+    .post-list{gap:12px;}
+    .post-card{grid-template-columns:112px minmax(0,1fr);gap:12px;padding:12px;border-radius:14px;}
+    .thumb{aspect-ratio:1/1;border-radius:11px;}
+    .post-cat{font-size:10.5px;margin-bottom:4px;}
+    .post-title{font-size:15px;line-height:1.35;margin-bottom:5px;}
+    .post-excerpt{font-size:12px;line-height:1.5;-webkit-line-clamp:2;}
+    .post-meta{gap:8px;margin-top:9px;font-size:11px;}
+    .post-meta svg{width:12px;height:12px;}
+    .post-actions{gap:5px;margin-top:9px;}
+    .post-action{font-size:11px;padding:7px 8px;}
+    .mobile-menu{top:68px;left:10px;right:10px;border-radius:14px;}
+    .mobile-menu a,.mobile-menu button{min-height:44px;padding:12px 13px;font-size:14px;}
+    .modal-scroll{padding:16px 14px 4px;}
+    .post-modal h2{font-size:21px;line-height:1.35;}
+    .modal-meta{gap:9px;font-size:11px;margin-bottom:16px;}
+    .comments{padding-bottom:14px;}
+    .comment-form{gap:7px;}
+    .comment-form button{padding:0 15px;}
+    .bgm-toggle{left:14px;bottom:14px;}
+    .instagram-fab{right:14px;bottom:14px;}
+  }
+
+  @media (max-width:360px){
+    .post-card{grid-template-columns:96px minmax(0,1fr);gap:10px;padding:10px;}
+    .post-title{font-size:14px;}
+    .post-excerpt{font-size:11.5px;}
+    .post-action{padding:6px 7px;font-size:10.5px;}
+  }
+
+  /* Motion refinement */
+  .page-wrap{animation:pageEnter .28s cubic-bezier(.25,.1,.25,1) both;}
+  .site-hero.show{animation:heroEnter .3s cubic-bezier(.25,.1,.25,1) both;}
+  .post-card{transition:opacity .28s cubic-bezier(.25,.1,.25,1),transform .28s cubic-bezier(.25,.1,.25,1);opacity:0;transform:translateY(8px);}
+  .post-card.in-view{transition:opacity .28s cubic-bezier(.25,.1,.25,1),transform .28s cubic-bezier(.25,.1,.25,1);}
+  .post-card:nth-child(2).in-view{transition-delay:40ms;}
+  .post-card:nth-child(3).in-view{transition-delay:80ms;}
+  .post-card:nth-child(4).in-view{transition-delay:120ms;}
+  .post-card:nth-child(5).in-view{transition-delay:160ms;}
+  .post-card:hover{transform:translateY(-2px) scale(1.01);}
+  .post-card,.post-card:hover{transition-property:opacity,transform;}
+  @media (prefers-reduced-motion: reduce){
+    .loading-screen::before,.loading-screen::after,.loading-brand,.loading-brand .mark,.loading-brand strong{animation:none;}
+    .post-card{opacity:1;transform:none;}
+  }
+  .app-modal-wrap .app-modal{transition:transform .28s cubic-bezier(.25,.1,.25,1),opacity .28s cubic-bezier(.25,.1,.25,1);}
+  .modal-overlay .post-modal{transition:transform .3s cubic-bezier(.25,.1,.25,1),opacity .28s cubic-bezier(.25,.1,.25,1);}
+  button:active,.tag-pill:active,.mobile-menu a:active,
+  .quick-btn:active,.sort-btn:active,.outline-btn:active,.primary-btn:active,.danger-btn:active,
+  .post-action:active{transform:scale(.97);}
+
 </style>
 </head>
-<body>
+<body class="auth-pending">
 
 
-  <div class="loading-screen" id="loadingScreen" aria-hidden="true"><div class="loading-dot"></div></div>
+  <div class="loading-screen" id="loadingScreen" aria-hidden="true"><div class="loading-brand"><span class="mark" aria-hidden="true"></span><strong>By ccmmhh</strong></div></div>
   <div class="toast-stack" id="toastStack" aria-live="polite"></div>
   <audio id="bgmAudio" loop preload="none"></audio>
   <button class="bgm-toggle" id="bgmToggle" style="display:none" aria-label="배경음악 재생">🔇</button>
@@ -773,7 +865,7 @@
 <section class="site-hero" id="siteHero" aria-label="사이트 대문 이미지">
   <div class="site-hero-content">
     <strong id="siteHeroTitle">By ccmmhh</strong>
-    <span id="siteHeroText">하루를, 조금씩</span>
+    <span id="siteHeroText">조용한 기록을 남깁니다.</span>
   </div>
 </section>
 
@@ -837,7 +929,7 @@
 </div>
 
 <footer class="site-footer">
-  © 2026 By ccmmhh. 하루를, 조금씩
+  © 2026 By ccmmhh. 조용한 기록을 남깁니다.
 </footer>
 
 <div class="modal-overlay" id="modalOverlay">
@@ -975,7 +1067,7 @@
           <div class="form-field"><label for="postTagsInput">태그</label><input id="postTagsInput" placeholder="미니멀, 일상, 기록"></div>
           <div class="form-field full" style="display:flex;align-items:center;gap:8px;"><input type="checkbox" id="postPrivateInput" style="width:16px;height:16px;margin:0;"><label for="postPrivateInput" style="margin:0;">비공개 (로그인한 회원만 볼 수 있음)</label></div>
           <div class="form-field full"><label for="postExcerptInput">요약</label><input id="postExcerptInput" maxlength="180"></div>
-          <div class="form-field full"><label for="postImageInput">썸네일 이미지 URL</label><input id="postImageInput" placeholder="선택 사항 — 비워두면 아래 첫 사진이 자동으로 대표 이미지가 됩니다"><input id="postImageFile" type="file" accept="image/*" style="margin-top:6px"></div>
+          <div class="form-field full"><label for="postImageInput">대표 이미지 URL</label><input id="postImageInput" placeholder="선택 사항 — 비워두면 아래 첫 사진이 자동으로 대표 이미지가 됩니다"><input id="postImageFile" type="file" accept="image/*" style="margin-top:6px"></div>
           <div class="form-field full"><label for="postMediaFile">사진 / 동영상 (여러 개 선택 가능)</label><input id="postMediaFile" type="file" accept="image/*,video/*" multiple><div class="media-preview-grid" id="mediaPreviewGrid"></div></div>
           <div class="form-field full"><label for="postBodyInput">본문</label><textarea id="postBodyInput" required placeholder="문단은 빈 줄로 구분됩니다."></textarea></div>
         </div>
@@ -1121,7 +1213,7 @@
     if(!await requireReady())return;
     const [pc,cc,ct,dr,lk,bm,ss]=await Promise.all([
       sb.from("posts").select("*,categories(id,name)").eq("status","published").order("published_at",{ascending:false}),
-      sb.from("comments").select("*,profiles(nickname,avatar_url)").eq("is_hidden",false).order("created_at",{ascending:true}),
+      sb.from("comments").select("*,profiles(nickname,avatar_url,is_admin)").eq("is_hidden",false).order("created_at",{ascending:true}),
       sb.from("categories").select("*").order("sort_order",{ascending:true}),
       state.user?sb.from("drafts").select("*").eq("user_id",state.user.id).order("updated_at",{ascending:false}):Promise.resolve({data:[]}),
       sb.from("likes").select("post_id,user_id"),
@@ -1151,7 +1243,7 @@
   }
 
   function renderProfile(){
-    const p=state.user||{}; $(".profile-name").textContent=p.nickname||siteName;$(".profile-bio").textContent=p.bio||"제품과 공간, 일상의 결을 조용히 기록합니다.";$("#profileIntro").textContent=p.bio||"하루를, 조금씩";
+    const p=state.user||{}; $(".profile-name").textContent=p.nickname||siteName;$(".profile-bio").textContent=p.bio||"제품과 공간, 일상의 결을 조용히 기록합니다.";$("#profileIntro").textContent=p.bio||"조용한 기록을 남깁니다.";
     const av=$(".profile-card .avatar"); if(p.avatar_url){av.style.backgroundImage=`url("${esc(p.avatar_url)}")`;av.style.backgroundSize="cover";av.style.backgroundPosition="center"}else{av.style.backgroundImage="";av.style.background=""}
     $("#visitorStatWrap").style.display=isAdmin()?"":"none";$("#visitorStat").textContent=Number(visitorCount).toLocaleString();
     $("#postStat").textContent=state.user?posts.filter(x=>x.author_id===state.user.id).length.toLocaleString():"-";
@@ -1237,7 +1329,7 @@
 
   function commentHTML(c,isReply){
     const mine=state.user&&c.user_id===state.user.id;
-    return `<div class="comment${isReply?" is-reply":""}" data-comment-id="${c.id}"><div class="c-avatar${isReply?" small":""}" style="${c.profiles?.avatar_url?`background-image:url('${esc(c.profiles.avatar_url)}');background-size:cover;background-position:center`:""}"></div><div class="c-body"><span class="c-name">${esc(c.profiles?.nickname||"회원")}</span><span class="c-date">${fmtDate(c.created_at)}</span><div class="c-text" data-comment-text="${c.id}">${esc(c.content)}</div><div class="c-actions">${isReply?"":`<button type="button" class="c-reply-btn" data-reply-to="${c.id}">답글 달기</button>`}${mine?`<button type="button" class="c-reply-btn" data-edit-comment="${c.id}">수정</button><button type="button" class="c-reply-btn c-delete-btn" data-delete-comment-self="${c.id}">삭제</button>`:""}</div>${isReply?"":`<div class="reply-form-wrap" data-reply-form-wrap="${c.id}"></div>`}</div></div>`;
+    return `<div class="comment${isReply?" is-reply":""}" data-comment-id="${c.id}"><div class="c-avatar${isReply?" small":""}" style="${c.profiles?.avatar_url?`background-image:url('${esc(c.profiles.avatar_url)}');background-size:cover;background-position:center`:""}"></div><div class="c-body"><span class="c-name">${esc(c.profiles?.nickname||"회원")}</span>${c.profiles?.is_admin?` <span class="admin-badge">작성자</span>`:""}<span class="c-date">${fmtDate(c.created_at)}</span><div class="c-text" data-comment-text="${c.id}">${esc(c.content)}</div><div class="c-actions">${isReply?"":`<button type="button" class="c-reply-btn" data-reply-to="${c.id}">답글 달기</button>`}${mine?`<button type="button" class="c-reply-btn" data-edit-comment="${c.id}">수정</button><button type="button" class="c-reply-btn c-delete-btn" data-delete-comment-self="${c.id}">삭제</button>`:""}</div>${isReply?"":`<div class="reply-form-wrap" data-reply-form-wrap="${c.id}"></div>`}</div></div>`;
   }
   function commentBlockHTML(c){
     const replies=getReplies(c.id);
@@ -1300,9 +1392,9 @@
     document.title=siteName+" — 개인 블로그";
     const brandSpan=$(".brand span");if(brandSpan)brandSpan.textContent=siteName;
     const mark=$("#brandMark");if(mark){if(siteSettings.logo_url){mark.style.backgroundImage=`url("${siteSettings.logo_url}")`;mark.style.backgroundSize="cover";mark.style.backgroundPosition="center"}else{mark.style.backgroundImage="";mark.style.backgroundSize="";mark.style.backgroundPosition=""}}
-    const hero=$("#siteHero");if(hero){const heroUrl=siteSettings.hero_image_url||"";hero.style.backgroundImage=heroUrl?`url("${heroUrl}")`:"none";hero.classList.toggle("show",!!heroUrl);$("#siteHeroTitle").textContent=siteName;$("#siteHeroText").textContent=siteSettings.hero_text||"하루를, 조금씩"}
+    const hero=$("#siteHero");if(hero){const heroUrl=siteSettings.hero_image_url||"";hero.style.backgroundImage=heroUrl?`url("${heroUrl}")`:"none";hero.classList.toggle("show",!!heroUrl);$("#siteHeroTitle").textContent=siteName;$("#siteHeroText").textContent=siteSettings.hero_text||"조용한 기록을 남깁니다."}
     const vn=$("#visitorNote");if(vn)vn.textContent=`오늘도 ${siteName}에 방문해 주셔서 감사합니다.`;
-    const footer=$(".site-footer");if(footer)footer.textContent=`© 2026 ${siteName}. 하루를, 조금씩`;
+    const footer=$(".site-footer");if(footer)footer.textContent=`© 2026 ${siteName}. 조용한 기록을 남깁니다.`;
     const tc=$("#tagCloud");if(tc)tc.innerHTML=siteTags.map(t=>`<a href="#" data-tag="${esc(t)}">#${esc(t)}</a>`).join("");
   }
   function applyBgm(){
@@ -1406,7 +1498,7 @@
       <div class="bgm-admin-row"><label>사이트 이름</label><input type="text" id="siteNameInput" value="${esc(siteName)}" placeholder="By ccmmhh"><div class="form-actions" style="justify-content:flex-start"><button class="outline-btn" id="siteNameSaveBtn">이름 저장</button></div></div>
       <div class="bgm-admin-row"><label>로고 이미지</label><input type="file" id="logoFileInput" accept="image/*"><div class="bgm-now">${siteSettings.logo_url?"현재 로고가 설정되어 있습니다.":"설정된 로고가 없습니다. 이미지를 올리면 기본 도형 대신 표시됩니다."}</div><div class="form-actions" style="justify-content:flex-start"><button class="outline-btn" id="logoRemoveBtn" ${siteSettings.logo_url?"":"disabled"}>로고 삭제</button></div></div>
       <div class="bgm-admin-row"><label>대문 이미지</label><input type="text" id="heroImageInput" value="${esc(siteSettings.hero_image_url||"")}" placeholder="이미지 URL을 입력하거나 아래에서 업로드"><input type="file" id="heroFileInput" accept="image/*"><div class="bgm-now">${siteSettings.hero_image_url?"현재 대문 이미지가 설정되어 있습니다.":"설정된 대문 이미지가 없습니다."}</div><div class="form-actions" style="justify-content:flex-start"><button class="outline-btn" id="heroImageSaveBtn">대문 이미지 저장</button><button class="outline-btn" id="heroRemoveBtn" ${siteSettings.hero_image_url?"":"disabled"}>대문 이미지 삭제</button></div></div>
-      <div class="bgm-admin-row"><label>대문 소개 문구</label><input type="text" id="heroTextInput" value="${esc(siteSettings.hero_text||"")}" placeholder="하루를, 조금씩"><div class="form-actions" style="justify-content:flex-start"><button class="outline-btn" id="heroTextSaveBtn">소개 문구 저장</button></div></div>
+      <div class="bgm-admin-row"><label>대문 소개 문구</label><input type="text" id="heroTextInput" value="${esc(siteSettings.hero_text||"")}" placeholder="조용한 기록을 남깁니다."><div class="form-actions" style="justify-content:flex-start"><button class="outline-btn" id="heroTextSaveBtn">소개 문구 저장</button></div></div>
       <div class="bgm-admin-row"><label>사이트 태그 (쉼표로 구분)</label><input type="text" id="siteTagsInput" value="${esc(siteTags.join(', '))}" placeholder="미니멀, 일상, 나무"><div class="form-actions" style="justify-content:flex-start"><button class="outline-btn" id="siteTagsSaveBtn">태그 저장</button></div></div>
       <div class="bgm-admin-row"><label>배경음악 파일 업로드 (mp3, m4a 등)</label><input type="file" id="bgmFileInput" accept="audio/*"><div class="bgm-now">${url?"현재 설정된 곡: "+esc(url):"설정된 배경음악이 없습니다. 파일을 올리면 모든 방문자에게 재생 버튼이 나타납니다."}</div><div class="form-actions" style="justify-content:flex-start"><button class="outline-btn" id="bgmRemoveBtn" ${url?"":"disabled"}>배경음악 삭제</button></div></div>`;
     $("#siteNameSaveBtn").onclick=async()=>{
@@ -1524,6 +1616,7 @@
 
   function initSupabase(){
     if(!SUPABASE_READY){
+      document.body.classList.remove("auth-pending");
       $("#loadingScreen").classList.add("hide");
       toast("Supabase 설정 전 미리보기 상태입니다. 파일 상단의 설정값을 입력하면 실제 DB/Auth/Storage가 활성화됩니다.","error");
       return;
@@ -1540,7 +1633,6 @@
           email:data.session.user.email,
           is_admin:false
         };
-        renderAll();
 
         const loadedProfile = await loadProfile(data.session.user.id);
         state.user = loadedProfile
@@ -1550,14 +1642,15 @@
         state.user=null;
       }
 
-      renderAll();
       await registerVisit();
       await loadAll();
+      document.body.classList.remove("auth-pending");
       $("#loadingScreen").classList.add("hide");
     });
 
     // 로그인/로그아웃/세션 갱신 감지
     sb.auth.onAuthStateChange((event,session)=>{
+      if(event==="INITIAL_SESSION")return;
       // 콜백 내부에서 Supabase API를 직접 await하지 않고 다음 tick에서 처리
       // 하여 Auth 내부 락과 충돌하는 문제를 피합니다.
       setTimeout(async()=>{
